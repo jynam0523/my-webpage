@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="공주대학교 문헌정보교육과 남진영의 개인 홈페이지">
+  <title>남진영 | 개인 홈페이지</title>
+  <style>
+    :root {
+      --background: #f7f8fc;
+      --surface: #ffffff;
+      --text: #24283b;
+      --muted: #666d80;
+      --accent: #5968c9;
+      --accent-light: #edf0ff;
+      --border: #e5e8f1;
+      --shadow: 0 12px 32px rgba(38, 48, 92, 0.07);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--text);
+      font-family: "Pretendard", "Noto Sans KR", "Malgun Gothic", sans-serif;
+      line-height: 1.7;
+      word-break: keep-all;
+    }
+    a { color: inherit; }
+    a:focus-visible {
+      outline: 3px solid #8792ed;
+      outline-offset: 4px;
+      border-radius: 5px;
+    }
+
+    .site-header {
+      padding: 76px 24px 64px;
+      text-align: center;
+      color: #fff;
+      background: linear-gradient(135deg, #626fd0 0%, #8b82d9 55%, #b1a0e5 100%);
+    }
+    .header-inner { width: min(100%, 900px); margin: 0 auto; }
+    .eyebrow {
+      display: inline-block;
+      margin: 0 0 12px;
+      padding: 5px 13px;
+      border: 1px solid rgba(255,255,255,.45);
+      border-radius: 999px;
+      font-size: .84rem;
+      letter-spacing: .04em;
+    }
+    h1 { margin: 0; font-size: clamp(2.4rem, 6vw, 4rem); line-height: 1.2; }
+    .header-intro { max-width: 650px; margin: 20px auto 0; font-size: clamp(1rem, 2.5vw, 1.15rem); }
+    .header-email { display: inline-block; margin-top: 18px; color: #fff; text-underline-offset: 4px; }
+
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255,255,255,.94);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+    }
+    .nav-inner {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      width: min(100% - 32px, 1000px);
+      margin: 0 auto;
+      padding: 12px 0;
+    }
+    .site-nav a {
+      display: inline-block;
+      padding: 8px 15px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-size: .94rem;
+      font-weight: 700;
+      transition: background .2s ease, color .2s ease;
+    }
+    .site-nav a:hover { background: var(--accent-light); color: var(--accent); }
+
+    .main-content { width: min(100% - 40px, 900px); margin: 0 auto; padding: 28px 0 64px; }
+    .content-section {
+      margin-top: 28px;
+      padding: clamp(22px, 4vw, 36px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      scroll-margin-top: 88px;
+    }
+    h2 { margin: 0 0 18px; font-size: clamp(1.45rem, 3vw, 1.8rem); line-height: 1.35; }
+    h2::before {
+      content: "";
+      display: inline-block;
+      width: 7px;
+      height: 1.1em;
+      margin-right: 11px;
+      vertical-align: -3px;
+      border-radius: 6px;
+      background: var(--accent);
+    }
+    p { margin: 0 0 12px; }
+    p:last-child { margin-bottom: 0; }
+    .muted { color: var(--muted); }
+    .interest-list { display: flex; flex-wrap: wrap; gap: 10px; padding: 0; margin: 0; list-style: none; }
+    .interest-list li {
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--accent-light);
+      color: #414eae;
+      font-weight: 700;
+    }
+    .activity-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .activity-card {
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: #fcfcff;
+    }
+    .activity-card h3 { margin: 0 0 8px; font-size: 1.08rem; }
+    .activity-card p { color: var(--muted); }
+
+    .project-list { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    .project-card {
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .project-card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(38,48,92,.08); }
+    .project-card h3 { margin: 0 0 8px; font-size: 1.15rem; }
+    .project-card p { color: var(--muted); }
+    .project-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 8px;
+      padding: 9px 14px;
+      border-radius: 10px;
+      background: var(--accent);
+      color: white;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .project-link:hover { background: #4655b4; }
+    .link-note { margin-top: 12px; font-size: .88rem; color: var(--muted); }
+
+    .site-footer { padding: 28px 20px 36px; text-align: center; color: var(--muted); font-size: .92rem; }
+    .site-footer a { color: var(--accent); text-underline-offset: 3px; }
+
+    @media (max-width: 600px) {
+      .site-header { padding: 56px 20px 48px; }
+      .nav-inner { gap: 3px; width: calc(100% - 16px); padding: 8px 0; }
+      .site-nav a { padding: 8px 10px; font-size: .88rem; }
+      .main-content { width: calc(100% - 24px); padding-top: 8px; }
+      .content-section { margin-top: 16px; padding: 22px 18px; border-radius: 17px; }
+      .activity-grid { grid-template-columns: 1fr; }
+      .project-card { padding: 18px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header" id="top">
+    <div class="header-inner">
+      <p class="eyebrow">MY PERSONAL SPACE</p>
+      <h1>남진영</h1>
+      <p class="header-intro">안녕하세요. 공주대학교 문헌정보교육과를 다니고 있는 남진영입니다.</p>
+      <a class="header-email" href="mailto:jynam0523@gmail.com">jynam0523@gmail.com</a>
+    </div>
+  </header>
+
+  <nav class="site-nav" aria-label="주요 메뉴">
+    <div class="nav-inner">
+      <a href="#about">소개</a>
+      <a href="#interests">관심사</a>
+      <a href="#activities">주요 활동</a>
+      <a href="#projects">프로젝트</a>
+    </div>
+  </nav>
+
+  <main class="main-content" id="main-content">
+    <section class="content-section" id="about" aria-labelledby="about-title">
+      <h2 id="about-title">소개</h2>
+      <p>안녕하세요! 공주대학교 문헌정보교육과에 재학 중인 남진영입니다.</p>
+      <p class="muted">책과 음악, 다양한 활동을 즐기며 일상 속에서 새로운 경험을 쌓아가고 있습니다.</p>
+    </section>
+
+    <section class="content-section" id="interests" aria-labelledby="interests-title">
+      <h2 id="interests-title">관심사</h2>
+      <ul class="interest-list">
+        <li>소설책</li>
+        <li>오케스트라</li>
+        <li>보드게임</li>
+        <li>신젤리</li>
+      </ul>
+    </section>
+
+    <section class="content-section" id="activities" aria-labelledby="activities-title">
+      <h2 id="activities-title">주요 활동</h2>
+      <div class="activity-grid">
+        <article class="activity-card">
+          <h3>📚 학기 중</h3>
+          <p>오케스트라 동아리와 도서관 근로, 학과생활을 주로 합니다.</p>
+        </article>
+        <article class="activity-card">
+          <h3>🧳 방학 중</h3>
+          <p>다양한 취미 활동을 즐기고 여러 곳으로 여행을 다닙니다.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="content-section" id="projects" aria-labelledby="projects-title">
+      <h2 id="projects-title">프로젝트</h2>
+      <div class="project-list">
+        <article class="project-card">
+          <h3>오늘의 할 일 관리</h3>
+          <p>하루 동안 해야 할 일을 확인하고 정리하기 위한 개인 프로젝트입니다.</p>
+          <a class="project-link" href="file:///C:/Users/jynam/Downloads/%EC%98%A4%EB%8A%98%EC%9D%98%20%ED%95%A0%20%EC%9D%BC.html" target="_blank" rel="noopener noreferrer">프로젝트 열기 <span aria-hidden="true">↗</span></a>
+          <p class="link-note">참고: 이 링크는 현재 컴퓨터의 파일 경로입니다. 다른 사람에게 홈페이지를 공유할 경우에는 프로젝트 파일을 웹에 올린 뒤 해당 주소로 바꿔야 방문자도 열 수 있습니다.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="site-footer">
+    <p>제작자: 남진영 · 공주대학교 문헌정보교육과</p>
+    <p>문의: <a href="mailto:jynam0523@gmail.com">jynam0523@gmail.com</a></p>
+  </footer>
+</body>
+</html>
