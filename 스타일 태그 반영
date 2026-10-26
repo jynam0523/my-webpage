@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="남진영의 개인 시작 홈페이지">
+  <title>Jinyoung's Start Page</title>
+  <style>
+    :root {
+      --bg: #f5f3ff;
+      --card: rgba(255,255,255,.88);
+      --ink: #292641;
+      --muted: #77748f;
+      --accent: #7868d9;
+      --accent-dark: #5e50bb;
+      --line: #e8e4fa;
+      --soft: #efecff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Pretendard", "Noto Sans KR", system-ui, -apple-system, sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, #e7e1ff 0, transparent 30%),
+        radial-gradient(circle at 90% 25%, #fce8f1 0, transparent 28%),
+        var(--bg);
+    }
+    .wrap { width: min(1050px, calc(100% - 32px)); margin: 0 auto; padding: 30px 0 44px; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+    .brand { font-weight: 800; letter-spacing: -.04em; font-size: 1.1rem; }
+    .brand span { color: var(--accent); }
+    .date-chip { color: var(--muted); font-size: .9rem; background: #ffffffa8; padding: 9px 13px; border-radius: 999px; }
+    .hero {
+      background: linear-gradient(130deg, #7868d9, #a18be9 62%, #d8b8e9);
+      color: white; border-radius: 28px; padding: clamp(25px, 5vw, 48px);
+      box-shadow: 0 18px 45px #7161bd25; position: relative; overflow: hidden;
+    }
+    .hero::after { content: "✦"; position: absolute; right: 7%; top: 8%; font-size: 5rem; opacity: .22; }
+    .eyebrow { font-size: .82rem; letter-spacing: .12em; opacity: .85; text-transform: uppercase; }
+    h1 { margin: 12px 0; font-size: clamp(2rem, 5vw, 3.4rem); letter-spacing: -.055em; }
+    .hero p { max-width: 650px; line-height: 1.8; margin: 0; color: #f7f5ff; }
+    .clock-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 25px; align-items: center; }
+    .clock { font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 750; letter-spacing: .03em; }
+    .clock-date { padding: 8px 12px; border: 1px solid #ffffff60; border-radius: 999px; font-size: .9rem; }
+    .search-card { margin-top: 20px; background: var(--card); border: 1px solid #fff; border-radius: 20px; padding: 20px; box-shadow: 0 8px 28px #4c3d8310; }
+    .search-form { display: flex; gap: 10px; }
+    .search-form input { flex: 1; min-width: 0; border: 1px solid var(--line); background: white; border-radius: 13px; padding: 14px 16px; font: inherit; outline: none; }
+    .search-form input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px #7868d91c; }
+    button, .button { border: 0; border-radius: 13px; padding: 13px 18px; font: inherit; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; transition: .18s ease; }
+    .primary { color: white; background: var(--accent); }
+    .primary:hover { background: var(--accent-dark); transform: translateY(-1px); }
+    .section-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 20px; margin-top: 20px; }
+    .card { background: var(--card); border: 1px solid #fff; border-radius: 22px; padding: 24px; box-shadow: 0 8px 28px #4c3d8310; }
+    .card h2 { margin: 0 0 8px; font-size: 1.25rem; letter-spacing: -.03em; }
+    .sub { color: var(--muted); font-size: .92rem; line-height: 1.65; margin: 0 0 18px; }
+    .profile-line { padding: 13px 0; border-bottom: 1px solid var(--line); }
+    .profile-line:last-child { border-bottom: 0; padding-bottom: 0; }
+    .profile-label { color: var(--muted); font-size: .8rem; margin-bottom: 5px; }
+    .profile-value { line-height: 1.65; overflow-wrap: anywhere; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag { background: var(--soft); color: #6255b4; border-radius: 999px; padding: 7px 11px; font-size: .88rem; }
+    .task-input { display: flex; gap: 8px; margin: 16px 0; }
+    .task-input input { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 12px; padding: 12px; font: inherit; }
+    .task-list { list-style: none; margin: 0; padding: 0; }
+    .task-list li { display: flex; align-items: center; gap: 10px; padding: 12px 2px; border-bottom: 1px solid var(--line); }
+    .task-list li:last-child { border-bottom: 0; }
+    .task-list input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); flex-shrink: 0; }
+    .task-text { flex: 1; overflow-wrap: anywhere; }
+    .done .task-text { color: #aaa6bd; text-decoration: line-through; }
+    .delete { background: transparent; color: #9993b2; padding: 5px 8px; font-size: 1.1rem; }
+    .delete:hover { background: #f5f1ff; color: #5e50bb; }
+    .task-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; color: var(--muted); font-size: .85rem; }
+    .text-button { color: var(--accent-dark); background: transparent; padding: 6px 0; }
+    .project-link { display: flex; gap: 12px; align-items: center; text-decoration: none; color: inherit; padding: 15px; border-radius: 15px; background: #f7f5ff; margin-top: 14px; }
+    .project-icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; background: white; font-size: 1.25rem; flex-shrink: 0; }
+    .project-link strong { display: block; margin-bottom: 4px; }
+    .project-link small { color: var(--muted); line-height: 1.5; }
+    .contact { display: inline-flex; margin-top: 16px; color: var(--accent-dark); text-decoration: none; font-weight: 650; overflow-wrap: anywhere; }
+    footer { text-align: center; color: var(--muted); font-size: .83rem; padding-top: 26px; }
+    @media (max-width: 720px) {
+      .section-grid { grid-template-columns: 1fr; }
+      header { align-items: flex-start; flex-direction: column; }
+      .search-form { flex-direction: column; }
+      .search-form button { width: 100%; }
+      .card { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div class="brand">JINYOUNG<span>.</span> HOME</div>
+      <div class="date-chip" id="headerDate">오늘도 좋은 하루 ✨</div>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">MY PERSONAL START PAGE</div>
+      <h1>안녕하세요, 남진영입니다!</h1>
+      <p>공주대학교 문헌정보교육과에 다니고 있는 남진영입니다.<br>
+      책과 음악, 새로운 취미와 여행을 좋아하는 저만의 시작 페이지예요.</p>
+      <div class="clock-row">
+        <div class="clock" id="clock">00:00:00</div>
+        <div class="clock-date" id="fullDate">날짜를 불러오는 중…</div>
+      </div>
+    </section>
+
+    <section class="search-card" aria-label="구글 검색">
+      <form class="search-form" action="https://www.google.com/search" method="get" target="_blank">
+        <input type="search" name="q" placeholder="Google에서 검색하기" aria-label="검색어 입력" required>
+        <button class="primary" type="submit">Google 검색 ↗</button>
+      </form>
+    </section>
+
+    <div class="section-grid">
+      <section class="card">
+        <h2>오늘의 할 일 ☑️</h2>
+        <p class="sub">해야 할 일을 적고 완료하면 체크해 보세요. 목록은 이 브라우저에 저장됩니다.</p>
+        <form class="task-input" id="taskForm">
+          <input id="taskEntry" type="text" placeholder="새로운 할 일 입력하기" maxlength="180" aria-label="새로운 할 일" required>
+          <button class="primary" type="submit">추가</button>
+        </form>
+        <ul class="task-list" id="taskList"></ul>
+        <div class="task-footer">
+          <span id="taskCount">할 일을 추가해 보세요!</span>
+          <button class="text-button" id="clearDone" type="button">완료 항목 지우기</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>나를 소개합니다 🌷</h2>
+        <p class="sub">일상 속에서 좋아하는 것들을 차곡차곡 모으는 중입니다.</p>
+        <div class="profile-line">
+          <div class="profile-label">관심사</div>
+          <div class="tags">
+            <span class="tag">📚 소설책</span>
+            <span class="tag">🎻 오케스트라</span>
+            <span class="tag">🎲 보드게임</span>
+            <span class="tag">🍬 신젤리</span>
+          </div>
+        </div>
+        <div class="profile-line">
+          <div class="profile-label">주요 활동</div>
+          <div class="profile-value">학기 중에는 오케스트라 동아리, 도서관 근로, 학과생활을 주로 합니다. 방학에는 다양한 취미 활동과 여행을 즐깁니다.</div>
+        </div>
+        <div class="profile-line">
+          <div class="profile-label">이메일</div>
+          <a class="contact" href="mailto:jynam0523@gmail.com">jynam0523@gmail.com ↗</a>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:20px">
+      <h2>개별 프로젝트 💡</h2>
+      <p class="sub">직접 만든 프로젝트를 빠르게 열어 볼 수 있어요.</p>
+      <a class="project-link" href="file:///C:/Users/jynam/Downloads/%EC%98%A4%EB%8A%98%EC%9D%98%20%ED%95%A0%20%EC%9D%BC.html">
+        <span class="project-icon">📝</span>
+        <span><strong>오늘의 할 일 관리</strong><small>나의 할 일을 기록하고 관리하는 프로젝트 · 클릭해서 열기</small></span>
+      </a>
+      <p class="sub" style="margin:12px 0 0">※ 프로젝트 링크는 진영님의 컴퓨터에 있는 파일 경로입니다. 다른 컴퓨터나 브라우저에서는 열리지 않을 수 있어요.</p>
+    </section>
+
+    <footer>Made with ♡ by Jinyoung · 나만의 작은 시작 공간</footer>
+  </main>
+
+  <script>
+    const clock = document.getElementById('clock');
+    const fullDate = document.getElementById('fullDate');
+    const headerDate = document.getElementById('headerDate');
+
+    function updateClock() {
+      const now = new Date();
+      clock.textContent = new Intl.DateTimeFormat('ko-KR', {
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+      }).format(now);
+      const dateText = new Intl.DateTimeFormat('ko-KR', {
+        year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
+      }).format(now);
+      fullDate.textContent = dateText;
+      headerDate.textContent = dateText;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    const taskForm = document.getElementById('taskForm');
+    const taskEntry = document.getElementById('taskEntry');
+    const taskList = document.getElementById('taskList');
+    const taskCount = document.getElementById('taskCount');
+    const storageKey = 'jinyoung-start-page-tasks-v1';
+    let tasks = [];
+    try {
+      const saved = localStorage.getItem(storageKey);
+      tasks = saved ? JSON.parse(saved) : [];
+      if (!Array.isArray(tasks)) tasks = [];
+    } catch (e) { tasks = []; }
+
+    function saveTasks() {
+      try { localStorage.setItem(storageKey, JSON.stringify(tasks)); } catch (e) {}
+    }
+    function renderTasks() {
+      taskList.replaceChildren();
+      tasks.forEach(task => {
+        const li = document.createElement('li');
+        if (task.done) li.classList.add('done');
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = Boolean(task.done);
+        checkbox.setAttribute('aria-label', task.text + ' 완료');
+        checkbox.addEventListener('change', () => {
+          task.done = checkbox.checked;
+          saveTasks();
+          renderTasks();
+        });
+
+        const text = document.createElement('span');
+        text.className = 'task-text';
+        text.textContent = task.text;
+
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'delete';
+        remove.textContent = '×';
+        remove.setAttribute('aria-label', task.text + ' 삭제');
+        remove.addEventListener('click', () => {
+          tasks = tasks.filter(item => item.id !== task.id);
+          saveTasks();
+          renderTasks();
+        });
+
+        li.append(checkbox, text, remove);
+        taskList.appendChild(li);
+      });
+      const remaining = tasks.filter(task => !task.done).length;
+      taskCount.textContent = tasks.length === 0
+        ? '할 일을 추가해 보세요!'
+        : `남은 할 일 ${remaining}개 · 전체 ${tasks.length}개`;
+    }
+    taskForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const text = taskEntry.value.trim();
+      if (!text) return;
+      tasks.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2), text, done: false });
+      saveTasks();
+      renderTasks();
+      taskEntry.value = '';
+      taskEntry.focus();
+    });
+    document.getElementById('clearDone').addEventListener('click', () => {
+      tasks = tasks.filter(task => !task.done);
+      saveTasks();
+      renderTasks();
+    });
+    renderTasks();
+  </script>
+</body>
+</html>
