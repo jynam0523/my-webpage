@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>행정 서류용 커스텀 도장 & 자필 서명 생성기</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Batang&family=Dokdo&family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Nanum+Gothic:wght@400;700;800&family=Nanum+Myeongjo:wght@400;700;800&family=Nanum+Pen+Script&family=Noto+Serif+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --bg-color: #f8fafc;
+            --panel-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-color: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            background: #e0e7ff;
+            color: #4338ca;
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 1.5rem;
+            gap: 1.5rem;
+        }
+
+        .sidebar {
+            width: 360px;
+            background: var(--panel-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            overflow-y: auto;
+            max-height: calc(100vh - 120px);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .mode-tabs {
+            display: flex;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 8px;
+            gap: 4px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 0.6rem;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #64748b;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #ffffff;
+            color: var(--primary-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .color-presets {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+        }
+
+        .color-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 0 1px var(--border-color);
+        }
+
+        .color-dot.active {
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+
+        .range-slider {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .range-slider input {
+            flex: 1;
+        }
+
+        .range-slider span {
+            font-size: 0.8rem;
+            color: #64748b;
+            width: 28px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .preview-card {
+            flex: 1;
+            background: var(--panel-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .preview-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+        }
+
+        .preview-body {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f1f5f9;
+            background-image: 
+                linear-gradient(45deg, #cbd5e1 25%, transparent 25%), 
+                linear-gradient(-45deg, #cbd5e1 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #cbd5e1 75%), 
+                linear-gradient(-45deg, transparent 75%, #cbd5e1 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            position: relative;
+            padding: 2rem;
+        }
+
+        canvas {
+            background: transparent;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1.25rem;
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .draw-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .guide-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 0.8rem;
+            color: #1e40af;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>
+            <span>🖊️ 서명 & 도장 인장 생성기</span>
+            <span class="badge">행정/공문서용</span>
+        </h1>
+    </header>
+
+    <div class="container">
+        <!-- 설정 사이드바 -->
+        <div class="sidebar">
+            <div class="mode-tabs">
+                <button class="tab-btn active" onclick="switchMode('stamp')">인장/도장 모드</button>
+                <button class="tab-btn" onclick="switchMode('signature')">자필 서명 패드</button>
+            </div>
+
+            <!-- 1. 도장 설정 모드 -->
+            <div id="stamp-options" class="options-group">
+                <div class="section-title">기본 입력</div>
+                <div class="form-group">
+                    <label>성명 / 명칭</label>
+                    <input type="text" id="stamp-text" value="남진영" maxlength="6" oninput="render()">
+                </div>
+                
+                <div class="grid-2" style="margin-top: 0.5rem;">
+                    <div class="form-group">
+                        <label>접미사 추가</label>
+                        <select id="stamp-suffix" onchange="render()">
+                            <option value="인">인 (印)</option>
+                            <option value="장">장 (章)</option>
+                            <option value="none">없음</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>도장 모양</label>
+                        <select id="stamp-shape" onchange="render()">
+                            <option value="circle">원형</option>
+                            <option value="square">정사각형</option>
+                            <option value="oval">결재용 타원</option>
+                            <option value="round-rect">둥근 사각</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="section-title" style="margin-top: 1rem;">글꼴 & 스타일</div>
+                <div class="form-group">
+                    <label>한글 폰트 선택</label>
+                    <select id="stamp-font" onchange="render()">
+                        <option value="'Nanum Myeongjo', serif">나눔명조 (기본)</option>
+                        <option value="'Batang', serif">바탕체 (전통)</option>
+                        <option value="'Gowun Batang', serif">고운바탕 (단정)</option>
+                        <option value="'Dokdo', cursive">독도체 (개성인장)</option>
+                        <option value="'Nanum Pen Script', cursive">나눔손글씨 (자필)</option>
+                        <option value="'Nanum Gothic', sans-serif">나눔고딕 (현대적)</option>
+                    </select>
+                </div>
+
+                <div class="section-title" style="margin-top: 1rem;">세부 옵션</div>
+                <div class="form-group">
+                    <label>인주 색상</label>
+                    <div class="color-presets">
+                        <div class="color-dot active" style="background: #C8102E;" onclick="setColor('#C8102E')"></div>
+                        <div class="color-dot" style="background: #D92D20;" onclick="setColor('#D92D20')"></div>
+                        <div class="color-dot" style="background: #991B1B;" onclick="setColor('#991B1B')"></div>
+                        <div class="color-dot" style="background: #000000;" onclick="setColor('#000000')"></div>
+                        <input type="color" id="stamp-color" value="#C8102E" onchange="render()" style="width:24px; height:24px; padding:0; border:none; cursor:pointer;">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 0.5rem;">
+                    <label>외곽선 두께</label>
+                    <div class="range-slider">
+                        <input type="range" id="border-width" min="2" max="12" value="6" oninput="render()">
+                        <span id="border-width-val">6px</span>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 0.5rem;">
+                    <label style="display:flex; justify-content:space-between;">
+                        <span>인주 번짐/질감 효과</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="texture-effect" checked onchange="render()">
+                        실제 도장 찍힘 노이즈 적용
+                    </label>
+                </div>
+            </div>
+
+            <!-- 2. 서명 패드 모드 -->
+            <div id="signature-options" class="options-group" style="display: none;">
+                <div class="section-title">서명 펜 설정</div>
+                <div class="form-group">
+                    <label>펜 색상</label>
+                    <div class="color-presets">
+                        <div class="color-dot active" style="background: #000000;" onclick="setSigColor('#000000')"></div>
+                        <div class="color-dot" style="background: #1E40AF;" onclick="setSigColor('#1E40AF')"></div>
+                        <div class="color-dot" style="background: #C8102E;" onclick="setSigColor('#C8102E')"></div>
+                        <input type="color" id="sig-color" value="#000000" onchange="updateSigStyle()" style="width:24px; height:24px; padding:0; border:none; cursor:pointer;">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 0.75rem;">
+                    <label>펜 두께</label>
+                    <div class="range-slider">
+                        <input type="range" id="sig-width" min="1" max="15" value="4" oninput="updateSigStyle()">
+                        <span id="sig-width-val">4px</span>
+                    </div>
+                </div>
+
+                <div class="draw-controls" style="margin-top: 1rem;">
+                    <button class="btn btn-secondary" onclick="clearSignature()">전체 지우기</button>
+                </div>
+            </div>
+
+            <div class="guide-box" style="margin-top: auto;">
+                💡 <b>안내:</b> 배경이 투명한 PNG 이미지로 생성됩니다. 한글(HWP), MS 워드, Excel 서류의 결재란에 바로 '글자처럼 취급' 또는 '본문 뒤로' 설정하여 삽입하세요.
+            </div>
+        </div>
+
+        <!-- 메인 캔버스 프리뷰 -->
+        <div class="main-content">
+            <div class="preview-card">
+                <div class="preview-header">
+                    <span style="font-weight: 600; font-size: 0.9rem;">실시간 실물 크기 미리보기</span>
+                    <span style="font-size: 0.8rem; color: #64748b;">배경: 투명 모눈 격자</span>
+                </div>
+                <div class="preview-body">
+                    <canvas id="mainCanvas" width="300" height="300"></canvas>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="copyToClipboard()">클립보드 복사</button>
+                    <button class="btn btn-primary" onclick="downloadPNG()">투명 PNG 다운로드</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let currentMode = 'stamp'; // 'stamp' or 'signature'
+        let isDrawing = false;
+
+        // 초기화
+        window.onload = () => {
+            initSignatureEvents();
+            render();
+        };
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.options-group').forEach(el => el.style.display = 'none');
+
+            if (mode === 'stamp') {
+                event.target.classList.add('active');
+                document.getElementById('stamp-options').style.display = 'block';
+                render();
+            } else {
+                event.target.classList.add('active');
+                document.getElementById('signature-options').style.display = 'block';
+                clearSignature();
+            }
+        }
+
+        // ==========================================
+        // 1. 도장 렌더링 로직
+        // ==========================================
+        function render() {
+            if (currentMode !== 'stamp') return;
+
+            const name = document.getElementById('stamp-text').value.trim() || '남진영';
+            const suffix = document.getElementById('stamp-suffix').value;
+            const shape = document.getElementById('stamp-shape').value;
+            const font = document.getElementById('stamp-font').value;
+            const color = document.getElementById('stamp-color').value;
+            const borderWidth = parseInt(document.getElementById('border-width').value);
+            const useTexture = document.getElementById('texture-effect').checked;
+
+            document.getElementById('border-width-val').innerText = borderWidth + 'px';
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 문구 합성 (4글자 맞춤)
+            let fullText = name;
+            if (suffix !== 'none') {
+                fullText += suffix;
+            }
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const size = 180;
+
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = borderWidth;
+
+            // 테두리 그리기
+            ctx.beginPath();
+            if (shape === 'circle') {
+                ctx.arc(centerX, centerY, size / 2, 0, Math.PI * 2);
+            } else if (shape === 'square') {
+                ctx.rect(centerX - size / 2, centerY - size / 2, size, size);
+            } else if (shape === 'oval') {
+                ctx.ellipse(centerX, centerY, size / 2.5, size / 1.8, 0, 0, Math.PI * 2);
+            } else if (shape === 'round-rect') {
+                ctx.roundRect(centerX - size / 2, centerY - size / 2, size, size, 20);
+            }
+            ctx.stroke();
+
+            // 텍스트 배치
+            ctx.font = `bold 52px ${font}`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            if (fullText.length === 4) {
+                // 전형적인 2x2 도장 배치 (우상->우하->좌상->좌하 순)
+                const offset = 32;
+                ctx.fillText(fullText[0], centerX + offset, centerY - offset);
+                ctx.fillText(fullText[1], centerX + offset, centerY + offset);
+                ctx.fillText(fullText[2], centerX - offset, centerY - offset);
+                ctx.fillText(fullText[3], centerX - offset, centerY + offset);
+            } else if (fullText.length === 3) {
+                // 3글자 세로 배치
+                const offset = 40;
+                ctx.fillText(fullText[0], centerX, centerY - offset);
+                ctx.fillText(fullText[1], centerX, centerY);
+                ctx.fillText(fullText[2], centerX, centerY + offset);
+            } else {
+                // 일반 한 줄
+                ctx.fillText(fullText, centerX, centerY);
+            }
+
+            ctx.restore();
+
+            // 인주 질감 노이즈 효과
+            if (useTexture) {
+                applyStampTexture(color);
+            }
+        }
+
+        function applyStampTexture(colorHex) {
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imgData.data;
+
+            for (let i = 0; i < data.length; i += 4) {
+                if (data[i + 3] > 0) { // 투명이 아닌 픽셀
+                    // 미세 픽셀 침식/노이즈
+                    if (Math.random() < 0.08) {
+                        data[i + 3] = Math.floor(data[i + 3] * (Math.random() * 0.4));
+                    }
+                }
+            }
+            ctx.putImageData(imgData, 0, 0);
+        }
+
+        function setColor(hex) {
+            document.getElementById('stamp-color').value = hex;
+            document.querySelectorAll('#stamp-options .color-dot').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+            render();
+        }
+
+        // ==========================================
+        // 2. 자필 서명 패드 로직
+        // ==========================================
+        function initSignatureEvents() {
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseleave', stopDrawing);
+
+            // 터치 이벤트 지원 (모바일/태블릿)
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                startDrawing({ clientX: touch.clientX, clientY: touch.clientY });
+            });
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                draw({ clientX: touch.clientX, clientY: touch.clientY });
+            });
+            canvas.addEventListener('touchend', stopDrawing);
+        }
+
+        function startDrawing(e) {
+            if (currentMode !== 'signature') return;
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        function draw(e) {
+            if (!isDrawing || currentMode !== 'signature') return;
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+            const color = document.getElementById('sig-color').value;
+            const width = parseInt(document.getElementById('sig-width').value);
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function clearSignature() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function setSigColor(hex) {
+            document.getElementById('sig-color').value = hex;
+            document.querySelectorAll('#signature-options .color-dot').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function updateSigStyle() {
+            const width = document.getElementById('sig-width').value;
+            document.getElementById('sig-width-val').innerText = width + 'px';
+        }
+
+        // ==========================================
+        // 3. 내보내기 & 다운로드
+        // ==========================================
+        function downloadPNG() {
+            const link = document.createElement('a');
+            const fileName = currentMode === 'stamp' 
+                ? `도장_${document.getElementById('stamp-text').value}.png` 
+                : `자필서명_${new Date().toISOString().slice(0,10)}.png`;
+            
+            link.download = fileName;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        async function copyToClipboard() {
+            try {
+                canvas.toBlob(async (blob) => {
+                    const item = new ClipboardItem({ 'image/png': blob });
+                    await navigator.clipboard.write([item]);
+                    alert('클립보드에 투명 서명/도장 이미지가 복사되었습니다! 문서 편집기에 [Ctrl + V]로 붙여넣으세요.');
+                });
+            } catch (err) {
+                alert('클립보드 복사를 지원하지 않는 브라우저입니다. PNG 다운로드를 이용해주세요.');
+            }
+        }
+    </script>
+</body>
+</html>
