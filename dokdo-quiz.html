@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>독도의 날 퀴즈</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e8f3fb;--card:#fff;--ink:#12324a;--sub:#4d6b82;--sea:#1b6fb0;--sea2:#d7ebf9;--ok:#1f9d63;--okbg:#dff5ea;--no:#d4503c;--nobg:#fde8e3;--line:#b9d6ea;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d2233;--card:#14344b;--ink:#eaf4fb;--sub:#9db8cb;--sea:#5aaee8;--sea2:#1c4562;--ok:#4cd08f;--okbg:#14412e;--no:#ff8a75;--nobg:#4a2620;--line:#2b5675}}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Jua","Apple SD Gothic Neo","Malgun Gothic",sans-serif;min-height:100vh;display:flex;justify-content:center;padding:16px}
+main{width:100%;max-width:720px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:24px;padding:28px 24px}
+h1{font-size:2.2rem;margin:0 0 8px;line-height:1.25}
+p{color:var(--sub);font-size:1.15rem;line-height:1.6;margin:0 0 20px}
+.btn{font:inherit;font-size:1.3rem;border:0;border-radius:16px;padding:16px 28px;background:var(--sea);color:#fff;cursor:pointer;min-height:56px}
+.btn:focus-visible,.opt:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:1.1rem;color:var(--sub);margin-bottom:10px}
+.bar{height:12px;background:var(--sea2);border-radius:99px;overflow:hidden;margin-bottom:22px}
+.bar i{display:block;height:100%;background:var(--sea);border-radius:99px;transition:width .3s}
+.q{font-size:1.7rem;line-height:1.4;margin:0 0 20px}
+.opts{display:grid;gap:12px}
+.opt{font:inherit;font-size:1.35rem;text-align:left;padding:16px 18px;min-height:64px;border-radius:16px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:flex;gap:14px;align-items:center}
+.opt b{flex:none;width:36px;height:36px;border-radius:50%;background:var(--sea2);display:grid;place-items:center;font-weight:400}
+.opt.ok{background:var(--okbg);border-color:var(--ok)}
+.opt.no{background:var(--nobg);border-color:var(--no);animation:shake .35s}
+.opt:disabled{cursor:default}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@media (prefers-reduced-motion:reduce){.opt.no{animation:none}.bar i{transition:none}}
+.fb{margin-top:18px;border-radius:16px;padding:14px 18px;font-size:1.25rem;line-height:1.5;min-height:56px}
+.fb.ok{background:var(--okbg);color:var(--ok)}
+.fb.no{background:var(--nobg);color:var(--no)}
+.fb small{display:block;color:var(--ink);font-size:1.05rem;margin-top:4px}
+.next{margin-top:16px;text-align:right}
+.score{font-size:4.5rem;margin:6px 0;color:var(--sea);line-height:1}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<main>
+ <section id="start" class="card">
+  <h1>독도의 날 퀴즈</h1>
+  <p>10월 25일은 독도의 날이에요. 독도에 대해 얼마나 알고 있는지 10문제로 확인해 보세요!</p>
+  <button class="btn" id="go">퀴즈 시작</button>
+ </section>
+
+ <section id="quiz" class="card hidden">
+  <div class="top"><span id="no"></span><span id="sc"></span></div>
+  <div class="bar"><i id="pg"></i></div>
+  <h2 class="q" id="q"></h2>
+  <div class="opts" id="opts"></div>
+  <div class="fb hidden" id="fb" role="status" aria-live="polite"></div>
+  <div class="next"><button class="btn hidden" id="next">다음 문제</button></div>
+ </section>
+
+ <section id="end" class="card hidden" style="text-align:center">
+  <h1>퀴즈 끝!</h1>
+  <div class="score" id="final"></div>
+  <p id="msg"></p>
+  <button class="btn" id="retry">다시 도전</button>
+ </section>
+</main>
+
+<script>
+const BANK=[
+{q:"독도의 날은 몇 월 며칠일까요?",o:["8월 15일","10월 25일","10월 9일","3월 1일"],a:1,e:"10월 25일이 독도의 날이에요."},
+{q:"독도는 어느 바다에 있을까요?",o:["동해","서해","남해","태평양"],a:0,e:"독도는 동해에 있는 우리나라 섬이에요."},
+{q:"독도는 우리나라의 어느 쪽 끝에 있을까요?",o:["서쪽 끝","남쪽 끝","북쪽 끝","동쪽 끝"],a:3,e:"독도는 우리나라 가장 동쪽에 있는 섬이에요."},
+{q:"독도와 가장 가까운 우리나라 섬은 어디일까요?",o:["제주도","강화도","울릉도","거제도"],a:2,e:"울릉도에서 독도까지는 배로 갈 수 있어요."},
+{q:"독도에서 흔히 볼 수 있는 새는 무엇일까요?",o:["참새","괭이갈매기","독수리","까치"],a:1,e:"독도에는 괭이갈매기가 많이 살아요."},
+{q:"독도는 크게 어떤 두 섬으로 이루어져 있을까요?",o:["동도와 서도","남도와 북도","상도와 하도","대도와 소도"],a:0,e:"독도는 동도와 서도, 두 개의 큰 섬과 작은 바위섬들로 이루어져 있어요."},
+{q:"조선 시대에 독도가 우리 땅임을 일본에 알린 사람은 누구일까요?",o:["이순신","세종대왕","김구","안용복"],a:3,e:"안용복은 독도를 지키기 위해 애쓴 인물이에요."},
+{q:"독도는 어느 도에 속해 있을까요?",o:["강원도","경상북도","전라남도","충청남도"],a:1,e:"독도는 경상북도 울릉군에 속해 있어요."},
+{q:"독도는 어떻게 만들어진 섬일까요?",o:["모래가 쌓여서","산호가 자라서","화산이 폭발해서","사람이 만들어서"],a:2,e:"독도는 아주 오래전 바다 속 화산이 솟아 만들어졌어요."},
+{q:"독도를 지키고 있는 사람들은 누구일까요?",o:["독도경비대","소방관","우체부","농부"],a:0,e:"독도경비대가 독도를 지키고 있어요."},
+{q:"독도에 휘날리는 우리나라 국기는 무엇일까요?",o:["태극기","성조기","오성홍기","유니언 잭"],a:0,e:"독도에는 태극기가 휘날려요."},
+{q:"신라 시대에 우산국(울릉도와 독도)을 우리 땅으로 만든 장군은 누구일까요?",o:["을지문덕","이사부","김유신","강감찬"],a:1,e:"신라의 이사부 장군이 우산국을 신라 땅으로 만들었어요."},
+{q:"독도의 날은 어떤 날일까요?",o:["한글을 만든 날","나무를 심는 날","독도를 사랑하고 지키려는 마음을 되새기는 날","새해 첫날"],a:2,e:"독도가 우리 땅임을 널리 알리고 소중히 지키자는 뜻으로 정한 날이에요."},
+{q:"독도는 자연이 아주 소중해서 나라에서 무엇으로 지정해 보호할까요?",o:["놀이공원","쓰레기장","주차장","천연기념물"],a:3,e:"독도는 천연기념물로 지정되어 보호받고 있어요."},
+{q:"독도의 '독'은 옛말로 무슨 뜻이라고 알려져 있을까요?",o:["돌","물","불","나무"],a:0,e:"독도는 '돌로 된 섬'이라는 뜻에서 왔다고 해요."},
+{q:"독도에서 배가 길을 잃지 않도록 밤바다를 비추는 건물은 무엇일까요?",o:["학교","병원","등대","극장"],a:2,e:"독도에는 밤바다를 밝히는 등대가 있어요."},
+{q:"독도는 어느 나라의 땅일까요?",o:["일본","대한민국","중국","러시아"],a:1,e:"독도는 역사적으로도, 국제법으로도 대한민국의 땅이에요."},
+{q:"독도 바위틈에서 자라는 꽃으로 알려진 것은 무엇일까요?",o:["장미","튤립","해바라기","해국"],a:3,e:"해국은 독도의 바위틈에서도 피는 꽃이에요."},
+{q:"'독도는 우리 땅'이라는 노래를 부른 가수는 누구일까요?",o:["정광태","조용필","이문세","나훈아"],a:0,e:"정광태 가수가 부른 노래예요."},
+{q:"울릉도에서 독도까지 가려면 무엇을 타야 할까요?",o:["기차","버스","지하철","배"],a:3,e:"독도는 바다 위의 섬이라 배를 타고 가요."}
+];
+const $=id=>document.getElementById(id);
+let i=0,score=0,first=true,ctx=null,Q=[],seen=new Set();
+function shuffle(a){for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
+function newSet(){
+  let ch=shuffle(BANK.map((_,k)=>k).filter(k=>!seen.has(k))).slice(0,10);
+  if(ch.length<10){
+    const rest=BANK.map((_,k)=>k).filter(k=>!ch.includes(k));
+    seen.clear();
+    ch=ch.concat(shuffle(rest).slice(0,10-ch.length));
+  }
+  ch.forEach(k=>seen.add(k));
+  Q=shuffle(ch).map(k=>{const d=BANK[k],c=d.o[d.a],o=shuffle(d.o.slice());return{q:d.q,o,a:o.indexOf(c),e:d.e}});
+}
+
+function tone(seq){
+  try{
+    ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();
+    let t=ctx.currentTime;
+    seq.forEach(([f,d,type])=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type=type||"sine";o.frequency.value=f;
+      g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.25,t+.02);
+      g.gain.exponentialRampToValueAtTime(.0001,t+d);
+      o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+d);t+=d*.9;
+    });
+  }catch(e){}
+}
+const sndOk=()=>tone([[660,.12],[880,.12],[1320,.22]]);
+const sndNo=()=>tone([[220,.18,"square"],[165,.28,"square"]]);
+const sndEnd=()=>tone([[523,.12],[659,.12],[784,.12],[1047,.3]]);
+
+function show(id){["start","quiz","end"].forEach(s=>$(s).classList.toggle("hidden",s!==id))}
+
+function render(){
+  const d=Q[i];first=true;
+  $("no").textContent=`${i+1} / ${Q.length}번 문제`;
+  $("sc").textContent=`점수 ${score}점`;
+  $("pg").style.width=(i/Q.length*100)+"%";
+  $("q").textContent=d.q;
+  $("fb").className="fb hidden";$("next").classList.add("hidden");
+  $("opts").innerHTML="";
+  d.o.forEach((t,k)=>{
+    const b=document.createElement("button");
+    b.className="opt";b.innerHTML=`<b>${k+1}</b><span></span>`;
+    b.lastChild.textContent=t;
+    b.onclick=()=>pick(k,b);
+    $("opts").appendChild(b);
+  });
+}
+
+function pick(k,b){
+  const d=Q[i],fb=$("fb");
+  if(k===d.a){
+    if(first)score++;
+    b.classList.add("ok");
+    [...$("opts").children].forEach(x=>x.disabled=true);
+    fb.className="fb ok";
+    fb.innerHTML="정답이에요! 🎉<small></small>";fb.querySelector("small").textContent=d.e;
+    $("sc").textContent=`점수 ${score}점`;
+    $("next").textContent=i===Q.length-1?"결과 보기":"다음 문제";
+    $("next").classList.remove("hidden");
+    sndOk();
+  }else{
+    first=false;
+    b.classList.add("no");b.disabled=true;
+    fb.className="fb no";fb.textContent="다시 생각해보세요 🤔";
+    sndNo();
+  }
+}
+
+function finish(){
+  show("end");
+  $("final").textContent=`${score} / ${Q.length}`;
+  $("msg").textContent=score===10?"만점이에요! 독도 박사가 되었어요!":score>=7?"잘했어요! 조금만 더 도전해 볼까요?":"괜찮아요. 다시 도전하면 더 잘할 수 있어요!";
+  sndEnd();
+}
+
+$("go").onclick=()=>{newSet();i=0;score=0;show("quiz");render();sndOk()};
+$("next").onclick=()=>{i++;i<Q.length?render():finish()};
+$("retry").onclick=()=>{newSet();i=0;score=0;show("quiz");render()};
+</script>
+</body>
+</html>
