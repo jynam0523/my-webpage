@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KDC 한국십진분류표 카드 맞추기 게임</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --primary-color: #1b4332;
+            --accent-color: #40916c;
+            --card-back: #2d6a4f;
+            --card-front: #ffffff;
+            --text-color: #2d3748;
+            --font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        p.subtitle {
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        .dashboard {
+            display: flex;
+            gap: 20px;
+            background: #ffffff;
+            padding: 12px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 70px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #718096;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: var(--primary-color);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            max-width: 900px;
+            width: 100%;
+            perspective: 1000px;
+        }
+
+        @media (max-width: 768px) {
+            .game-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 500px) {
+            .game-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .card {
+            aspect-ratio: 3 / 4;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1);
+            cursor: pointer;
+            border-radius: 10px;
+        }
+
+        .card.flipped, .card.matched {
+            transform: rotateY(180deg);
+        }
+
+        .card.matched {
+            cursor: default;
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            user-select: none;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, var(--card-back), #1b4332);
+            color: #d8f3dc;
+            border: 2px solid #52b788;
+        }
+
+        .card-back::after {
+            content: '📚';
+            font-size: 2rem;
+        }
+
+        .card-front {
+            background-color: var(--card-front);
+            color: var(--text-color);
+            transform: rotateY(180deg);
+            border: 2px solid #b7e4c7;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .card-code {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #2d6a4f;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1b4332;
+        }
+
+        .card-desc {
+            font-size: 0.75rem;
+            color: #4a5568;
+            word-break: keep-all;
+            line-height: 1.2;
+        }
+
+        .card.shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        .card.matched .card-front {
+            background-color: #d8f3dc;
+            border-color: #52b788;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotateY(180deg) translateX(0); }
+            20% { transform: rotateY(180deg) translateX(-6px); }
+            40% { transform: rotateY(180deg) translateX(6px); }
+            60% { transform: rotateY(180deg) translateX(-4px); }
+            80% { transform: rotateY(180deg) translateX(4px); }
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 100;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal h2 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+
+        .modal p {
+            margin-bottom: 20px;
+            color: #4a5568;
+        }
+
+        canvas#confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 99;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>📚 KDC 한국십진분류표 암기 게임</h1>
+        <p class="subtitle">분류기호(000~900)와 해당하는 주제 카드의 짝을 맞춰보세요!</p>
+    </header>
+
+    <div class="dashboard">
+        <div class="stat-item">
+            <span class="stat-label">점수</span>
+            <span class="stat-value" id="score">0</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">시도 횟수</span>
+            <span class="stat-value" id="moves">0</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">시간</span>
+            <span class="stat-value" id="timer">00:00</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">최고 점수</span>
+            <span class="stat-value" id="high-score">0</span>
+        </div>
+        <div class="controls">
+            <button id="sound-btn">🔊 소리 켬</button>
+            <button id="restart-btn">🔄 다시 시작</button>
+        </div>
+    </div>
+
+    <div class="game-grid" id="grid"></div>
+
+    <div class="modal-overlay" id="modal">
+        <div class="modal">
+            <h2>🎉 축하합니다!</h2>
+            <p id="modal-desc">KDC 10대 주류를 모두 완벽하게 맞추셨습니다!</p>
+            <button id="modal-restart-btn">한 번 더 하기 🚀</button>
+        </div>
+    </div>
+
+    <canvas id="confetti"></canvas>
+
+    <script>
+        // KDC Data (10 Pairs)
+        const kdcData = [
+            { id: 0, code: "000", title: "총류", desc: "도서학, 백과사전, 신문, 학회, 컴퓨터학" },
+            { id: 1, code: "100", title: "철학", desc: "형이상학, 심리학, 윤리학, 논리학" },
+            { id: 2, code: "200", title: "종교", desc: "불교, 기독교, 도교, 신학, 비교종교" },
+            { id: 3, code: "300", title: "사회과학", desc: "정치, 경제, 법학, 교육, 사회학, 풍속" },
+            { id: 4, code: "400", title: "순수과학", desc: "수학, 물리학, 화학, 천문학, 생물학" },
+            { id: 5, code: "500", title: "기술과학", desc: "의학, 농업, 공학, 가정학, 건축" },
+            { id: 6, code: "600", title: "예술", desc: "음악, 미술, 연극, 체육, 사진, 무용" },
+            { id: 7, code: "700", title: "언어", desc: "한국어, 영어, 국어학, 문법, 회화" },
+            { id: 8, code: "800", title: "문학", desc: "시, 소설, 수필, 희곡, 각국 문학" },
+            { id: 9, code: "900", title: "역사", desc: "아시아사, 세계사, 지리, 전기, 위인전" }
+        ];
+
+        // Sound Synthesis (Web Audio API)
+        class SoundController {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+
+            playFlip() {
+                if (this.muted) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(600, this.ctx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.08);
+            }
+
+            playMatch() {
+                if (this.muted) return;
+                this.init();
+                const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.08);
+                    gain.gain.setValueAtTime(0.2, this.ctx.currentTime + idx * 0.08);
+                    gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.08 + 0.2);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(this.ctx.currentTime + idx * 0.08);
+                    osc.stop(this.ctx.currentTime + idx * 0.08 + 0.2);
+                });
+            }
+
+            playMismatch() {
+                if (this.muted) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(160, this.ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(110, this.ctx.currentTime + 0.25);
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.25);
+            }
+
+            playVictory() {
+                if (this.muted) return;
+                this.init();
+                const melody = [
+                    { freq: 523.25, duration: 0.15 },
+                    { freq: 659.25, duration: 0.15 },
+                    { freq: 783.99, duration: 0.15 },
+                    { freq: 1046.50, duration: 0.4 }
+                ];
+                let time = this.ctx.currentTime;
+                melody.forEach(note => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(note.freq, time);
+                    gain.gain.setValueAtTime(0.25, time);
+                    gain.gain.linearRampToValueAtTime(0.01, time + note.duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(time);
+                    osc.stop(time + note.duration);
+                    time += note.duration;
+                });
+            }
+        }
+
+        // Game State Variables
+        let cards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let score = 0;
+        let moves = 0;
+        let combo = 0;
+        let timerSeconds = 0;
+        let timerInterval = null;
+        let isLocked = false;
+
+        const sound = new SoundController();
+        const gridEl = document.getElementById('grid');
+        const scoreEl = document.getElementById('score');
+        const movesEl = document.getElementById('moves');
+        const timerEl = document.getElementById('timer');
+        const highScoreEl = document.getElementById('high-score');
+        const soundBtn = document.getElementById('sound-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const modalEl = document.getElementById('modal');
+        const modalDescEl = document.getElementById('modal-desc');
+        const modalRestartBtn = document.getElementById('modal-restart-btn');
+
+        // Load High Score
+        let highScore = localStorage.getItem('kdc_game_highscore') || 0;
+        highScoreEl.textContent = highScore;
+
+        // Initialize Game
+        function initGame() {
+            gridEl.innerHTML = '';
+            flippedCards = [];
+            matchedPairs = 0;
+            score = 0;
+            moves = 0;
+            combo = 0;
+            timerSeconds = 0;
+            isLocked = false;
+            
+            scoreEl.textContent = '0';
+            movesEl.textContent = '0';
+            timerEl.textContent = '00:00';
+            modalEl.classList.remove('active');
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimer, 1000);
+
+            // Prepare cards array (20 cards total: 10 Code, 10 Topic)
+            const deck = [];
+            kdcData.forEach(item => {
+                deck.push({ id: item.id, type: 'code', code: item.code });
+                deck.push({ id: item.id, type: 'topic', title: item.title, desc: item.desc });
+            });
+
+            // Shuffle cards
+            cards = deck.sort(() => Math.random() - 0.5);
+
+            // Render cards
+            cards.forEach((cardData, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.classList.add('card');
+                cardEl.dataset.index = index;
+
+                const backEl = document.createElement('div');
+                backEl.classList.add('card-face', 'card-back');
+
+                const frontEl = document.createElement('div');
+                frontEl.classList.add('card-face', 'card-front');
+
+                if (cardData.type === 'code') {
+                    frontEl.innerHTML = `<div class="card-code">${cardData.code}</div>`;
+                } else {
+                    frontEl.innerHTML = `<div class="card-title">${cardData.title}</div><div class="card-desc">${cardData.desc}</div>`;
+                }
+
+                cardEl.appendChild(backEl);
+                cardEl.appendChild(frontEl);
+
+                cardEl.addEventListener('click', () => handleCardClick(cardEl, index));
+                gridEl.appendChild(cardEl);
+            });
+        }
+
+        function updateTimer() {
+            timerSeconds++;
+            const mins = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+            const secs = String(timerSeconds % 60).padStart(2, '0');
+            timerEl.textContent = `${mins}:${secs}`;
+        }
+
+        function handleCardClick(cardEl, index) {
+            if (isLocked) return;
+            if (cardEl.classList.contains('flipped') || cardEl.classList.contains('matched')) return;
+
+            sound.playFlip();
+            cardEl.classList.add('flipped');
+            flippedCards.push({ element: cardEl, data: cards[index] });
+
+            if (flippedCards.length === 2) {
+                moves++;
+                movesEl.textContent = moves;
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            isLocked = true;
+            const [card1, card2] = flippedCards;
+
+            if (card1.data.id === card2.data.id) {
+                // Match
+                setTimeout(() => {
+                    sound.playMatch();
+                    card1.element.classList.add('matched');
+                    card2.element.classList.add('matched');
+
+                    combo++;
+                    const points = 100 + (combo - 1) * 20;
+                    score += points;
+                    scoreEl.textContent = score;
+
+                    matchedPairs++;
+                    flippedCards = [];
+                    isLocked = false;
+
+                    if (matchedPairs === kdcData.length) {
+                        handleVictory();
+                    }
+                }, 400);
+            } else {
+                // Mismatch
+                setTimeout(() => {
+                    sound.playMismatch();
+                    card1.element.classList.add('shake');
+                    card2.element.classList.add('shake');
+                }, 400);
+
+                setTimeout(() => {
+                    card1.element.classList.remove('flipped', 'shake');
+                    card2.element.classList.remove('flipped', 'shake');
+                    combo = 0;
+                    flippedCards = [];
+                    isLocked = false;
+                }, 1200);
+            }
+        }
+
+        function handleVictory() {
+            clearInterval(timerInterval);
+            sound.playVictory();
+            launchConfetti();
+
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('kdc_game_highscore', highScore);
+                highScoreEl.textContent = highScore;
+            }
+
+            modalDescEl.innerHTML = `총 <b>${moves}번</b> 시도 / 소요시간 <b>${timerEl.textContent}</b><br>최종 점수: <b>${score}점</b>!`;
+            setTimeout(() => {
+                modalEl.classList.add('active');
+            }, 600);
+        }
+
+        // Confetti Effect
+        function launchConfetti() {
+            const canvas = document.getElementById('confetti');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#2d6a4f', '#52b788', '#b7e4c7', '#f72585', '#4cc9f0', '#ffb703'];
+
+            for (let i = 0; i < 120; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: (Math.random() - 0.7) * 12,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    radius: Math.random() * 6 + 4,
+                    alpha: 1
+                });
+            }
+
+            function render() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let alive = false;
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.2; // gravity
+                    p.alpha -= 0.01;
+                    if (p.alpha > 0) {
+                        alive = true;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                        ctx.fillStyle = p.color;
+                        ctx.globalAlpha = p.alpha;
+                        ctx.fill();
+                    }
+                });
+                if (alive) requestAnimationFrame(render);
+            }
+            render();
+        }
+
+        // Event Listeners
+        soundBtn.addEventListener('click', () => {
+            sound.muted = !sound.muted;
+            soundBtn.textContent = sound.muted ? '🔇 음소거' : '🔊 소리 켬';
+        });
+
+        restartBtn.addEventListener('click', initGame);
+        modalRestartBtn.addEventListener('click', initGame);
+
+        // Start Game
+        initGame();
+    </script>
+</body>
+</html>
