@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>시계 읽기 연습</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
+<style>
+:root{--bg:#e8f4fb;--card:#ffffff;--ink:#1d3557;--sub:#5b7490;--rim:#ffc93c;--face:#fffdf5;--hour:#2a6fdb;--min:#f2603b;--ok:#1f9d63;--bad:#d64545;--line:#b8c9d9;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10202e;--card:#1a2e40;--ink:#eaf3fb;--sub:#9fb6cb;--face:#22384d;--line:#4b657d;--hour:#6fa8ff;--min:#ff8a66}}
+:root[data-theme="dark"]{--bg:#10202e;--card:#1a2e40;--ink:#eaf3fb;--sub:#9fb6cb;--face:#22384d;--line:#4b657d;--hour:#6fa8ff;--min:#ff8a66}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Jua","Apple SD Gothic Neo","Malgun Gothic",sans-serif;min-height:100vh;display:flex;justify-content:center;padding:16px}
+main{width:100%;max-width:720px}
+h1{font-size:clamp(24px,5vw,34px);margin:4px 0 12px;text-align:center}
+.levels{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.levels button{font:inherit;font-size:clamp(14px,3.6vw,18px);padding:10px 4px;border-radius:14px;border:3px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.levels button[aria-pressed="true"]{background:var(--hour);border-color:var(--hour);color:#fff}
+.levels small{display:block;font-size:.75em;opacity:.85}
+.card{background:var(--card);border-radius:24px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:12px;position:relative;overflow:hidden}
+svg{width:min(80vw,340px);height:auto}
+.hand{transition:transform 1.1s cubic-bezier(.3,1.3,.5,1);transform-origin:100px 100px;transform-box:view-box}
+.ask{font-size:clamp(20px,5vw,26px)}
+.inputs{display:flex;align-items:center;gap:8px;font-size:clamp(20px,5vw,26px)}
+.inputs input{font:inherit;width:84px;font-size:1.3em;text-align:center;padding:8px;border-radius:14px;border:3px solid var(--line);background:var(--bg);color:var(--ink)}
+.inputs input:focus-visible,button:focus-visible{outline:4px solid var(--rim);outline-offset:2px}
+.act{font:inherit;font-size:clamp(20px,5vw,24px);padding:12px 32px;border-radius:999px;border:0;background:var(--ok);color:#fff;cursor:pointer}
+.act:disabled{opacity:.5;cursor:default}
+.next{background:var(--hour)}
+.msg{min-height:76px;text-align:center;font-size:clamp(17px,4.4vw,22px);line-height:1.5;width:100%}
+.msg.ok{color:var(--ok)}.msg.bad{color:var(--bad)}
+.msg .hint{display:block;color:var(--sub);font-size:.85em}
+.score{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;text-align:center}
+.score div{background:var(--card);border-radius:16px;padding:10px;font-size:clamp(14px,3.8vw,18px);color:var(--sub)}
+.score b{display:block;font-size:1.7em;color:var(--ink)}
+.balloon{position:absolute;bottom:-60px;font-size:40px;animation:up 1.8s ease-out forwards;pointer-events:none}
+@keyframes up{to{transform:translateY(-420px) rotate(12deg);opacity:0}}
+.shake{animation:sh .4s}
+@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.modes button{font:inherit;font-size:clamp(16px,4vw,20px);padding:10px 4px;border-radius:14px;border:3px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.modes button[aria-pressed="true"]{background:var(--min);border-color:var(--min);color:#fff}
+svg.free{touch-action:none;cursor:grab}
+svg.free .hand{transition:none}
+.read{text-align:center;width:100%}
+.read .big{font-size:clamp(28px,8vw,40px)}
+.read .dig{font-size:clamp(20px,5vw,26px);color:var(--sub);letter-spacing:.08em}
+.read .rhint{font-size:clamp(15px,4vw,19px);line-height:1.6;margin-top:6px;min-height:50px}
+.read .tip{font-size:clamp(13px,3.4vw,16px);color:var(--sub);margin-top:4px}
+.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%}
+.tools button{font:inherit;font-size:clamp(14px,3.8vw,18px);padding:10px 2px;border-radius:999px;border:3px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.inputs{flex-wrap:wrap;justify-content:center;gap:10px 16px}
+.inputs input{width:68px}
+.grp{display:inline-flex;align-items:center;gap:6px}
+.step{font:inherit;width:48px;height:48px;padding:0;border-radius:50%;border:3px solid var(--line);background:var(--bg);color:var(--ink);font-size:30px;line-height:1;cursor:pointer;touch-action:manipulation}
+.step:active{transform:scale(.9)}
+.grp.h .step{border-color:var(--hour);color:var(--hour)}
+.grp.m .step{border-color:var(--min);color:var(--min)}
+@media (prefers-reduced-motion:reduce){.hand{transition:none}.balloon{animation-duration:.01s}.shake{animation:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>시계 읽기 연습</h1>
+<div class="modes" id="modes"><button aria-pressed="true" data-m="0">문제 풀기</button><button aria-pressed="false" data-m="1">연습 모드</button></div>
+<div class="levels" id="levels"></div>
+<section class="card" id="card">
+<svg viewBox="0 0 200 200" role="img" aria-label="아날로그 시계" id="clock">
+<circle cx="100" cy="100" r="97" fill="var(--rim)"/>
+<circle cx="100" cy="100" r="91" fill="var(--face)"/>
+<g id="ticks"></g><g id="nums" font-family="Jua,sans-serif" font-size="17" text-anchor="middle" fill="var(--ink)"></g>
+<line class="hand" id="hh" x1="100" y1="100" x2="100" y2="58" stroke="var(--hour)" stroke-width="7" stroke-linecap="round"/>
+<line class="hand" id="mh" x1="100" y1="100" x2="100" y2="30" stroke="var(--min)" stroke-width="4" stroke-linecap="round"/>
+<circle cx="100" cy="100" r="5" fill="var(--ink)"/>
+</svg>
+<div class="ask" id="ask">지금은 몇 시 몇 분일까요?</div>
+<div class="read" id="read" style="display:none"><div class="big" id="rbig"></div><div class="dig" id="rdig"></div><div class="rhint" id="rhint"></div><div class="tip">바늘을 손가락이나 마우스로 돌려 보세요. 긴바늘을 돌리면 짧은바늘도 함께 움직여요.</div></div>
+<div class="tools" id="tools" style="display:none"><button data-d="-60">−1시간</button><button data-d="60">+1시간</button><button data-d="-5">−5분</button><button data-d="5">+5분</button></div>
+<div class="inputs">
+<span class="grp h"><button type="button" class="step" data-t="hi" data-s="-1" aria-label="시 줄이기">−</button><input id="hi" type="number" inputmode="numeric" min="1" max="12" aria-label="시" placeholder="시"><button type="button" class="step" data-t="hi" data-s="1" aria-label="시 늘리기">+</button><span>시</span></span>
+<span class="grp m"><button type="button" class="step" data-t="mi" data-s="-1" aria-label="분 줄이기">−</button><input id="mi" type="number" inputmode="numeric" min="0" max="59" aria-label="분" placeholder="분"><button type="button" class="step" data-t="mi" data-s="1" aria-label="분 늘리기">+</button><span>분</span></span>
+</div>
+<button class="act" id="go">정답 확인</button>
+<div class="msg" id="msg" aria-live="polite"></div>
+</section>
+<div class="score">
+<div>총 문제<b id="sT">0</b></div><div>맞힌 문제<b id="sO">0</b></div><div>틀린 문제<b id="sX">0</b></div>
+</div>
+</main>
+<script>
+(function(){
+var NS="http://www.w3.org/2000/svg",$=function(i){return document.getElementById(i)};
+var ticks=$("ticks"),nums=$("nums");
+for(var i=0;i<60;i++){var big=i%5===0,l=document.createElementNS(NS,"line");
+l.setAttribute("x1",100);l.setAttribute("x2",100);l.setAttribute("y1",big?11:11);l.setAttribute("y2",big?20:15);
+l.setAttribute("stroke",big?"var(--ink)":"var(--sub)");l.setAttribute("stroke-width",big?2.4:1);
+l.setAttribute("transform","rotate("+i*6+" 100 100)");ticks.appendChild(l)}
+for(var n=1;n<=12;n++){var a=n*30*Math.PI/180,t=document.createElementNS(NS,"text");
+t.setAttribute("x",100+Math.sin(a)*70);t.setAttribute("y",100-Math.cos(a)*70+6);t.textContent=n;nums.appendChild(t)}
+
+var LV=[["1단계","정시"],["2단계","30분"],["3단계","5분 단위"],["4단계","1분 단위"]];
+var HINT=[
+"긴바늘이 12에 있으면 정각이에요. 짧은바늘이 가리키는 숫자가 시예요.",
+"긴바늘이 6에 있으면 30분, 12에 있으면 정각이에요.",
+"긴바늘이 가리키는 숫자에 5를 곱해요. 1은 5분, 2는 10분, 3은 15분이에요.",
+"긴바늘이 숫자 사이 작은 눈금을 몇 칸 더 갔는지 세어 보세요. 한 칸이 1분이에요."];
+var level=0,h=0,m=0,done=true,ang={h:0,m:0},total=0,ok=0,bad=0,timer=null;
+var lv=$("levels");
+LV.forEach(function(x,i){var b=document.createElement("button");b.innerHTML=x[0]+"<small>"+x[1]+"</small>";
+b.setAttribute("aria-pressed",i===0);b.onclick=function(){level=i;[].forEach.call(lv.children,function(c,j){c.setAttribute("aria-pressed",j===i)});clearTimeout(timer);next()};lv.appendChild(b)});
+
+function setHand(id,key,target){var cur=ang[key],d=((target-cur%360)+360)%360;ang[key]=cur+d;$(id).style.transform="rotate("+ang[key]+"deg)"}
+function show(){setHand("mh","m",m*6);setHand("hh","h",(h%12+m/60)*30)}
+function next(){
+h=1+Math.floor(Math.random()*12);
+m=[0,[0,30][Math.floor(Math.random()*2)],5*Math.floor(Math.random()*12),Math.floor(Math.random()*60)][level];
+done=false;$("hi").value="";$("mi").value="";$("msg").textContent="";$("msg").className="msg";
+$("go").textContent="정답 확인";$("go").className="act";$("go").disabled=false;
+show();$("hi").focus({preventScroll:true})}
+function say(h,m){return h+"시 "+(m===0?"정각":m+"분")}
+function balloons(){var c=$("card"),e=["🎈","🎉","⭐","🎈","🎊","🎈"];
+for(var i=0;i<14;i++){var s=document.createElement("span");s.className="balloon";s.textContent=e[i%e.length];
+s.style.left=(4+Math.random()*88)+"%";s.style.animationDelay=(Math.random()*.4)+"s";c.appendChild(s);
+setTimeout(function(x){return function(){x.remove()}}(s),2400)}}
+function check(){
+if(done){clearTimeout(timer);next();return}
+var hv=$("hi").value,mv=$("mi").value,msg=$("msg");
+if(hv===""||mv===""){msg.className="msg bad";msg.textContent="시와 분을 모두 입력해 주세요.";return}
+hv=+hv;mv=+mv;total++;$("sT").textContent=total;
+if(hv===h&&mv===m){ok++;$("sO").textContent=ok;done=true;$("go").disabled=true;
+msg.className="msg ok";msg.textContent="정답이에요! "+say(h,m)+" 잘 읽었어요 👏";balloons();
+timer=setTimeout(next,1800)}
+else{bad++;$("sX").textContent=bad;done=true;
+msg.className="msg bad";msg.innerHTML="아쉬워요. 정답은 "+say(h,m)+"이에요.<span class=\"hint\">💡 "+HINT[level]+(m!==0?" 짧은바늘은 지나간 숫자가 시예요.":"")+"</span>";
+$("go").textContent="다음 문제";$("go").className="act next";
+$("card").classList.remove("shake");void $("card").offsetWidth;$("card").classList.add("shake")}}
+$("go").onclick=check;
+var STEP=[5,30,5,1];
+[].forEach.call(document.querySelectorAll(".step"),function(b){b.onclick=function(){
+if(done)return;
+var el=$(b.dataset.t),s=+b.dataset.s,v=el.value===""?null:+el.value;
+if(b.dataset.t==="hi"){v=v===null?(s>0?1:12):(((v-1+s)%12)+12)%12+1}
+else{v=((((v===null?0:v)+s*STEP[level])%60)+60)%60}
+el.value=v;$("msg").textContent=""}});
+
+var practice=false,t=0,drag=null,svg=$("clock");
+function pinfo(e){var r=svg.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2),a=Math.atan2(dx,-dy)*180/Math.PI;if(a<0)a+=360;return{a:a,r:Math.hypot(dx,dy)/(r.width/200)}}
+function diff(a,b){var d=Math.abs(a-b)%360;return d>180?360-d:d}
+function render(){
+var H=Math.floor(t/60)||12,M=t%60,ha=t*.5,ma=M*6;
+ang.h=ha;ang.m=ma;
+$("hh").style.transform="rotate("+ha+"deg)";$("mh").style.transform="rotate("+ma+"deg)";
+$("rbig").textContent=H+"시 "+(M===0?"정각":M+"분");
+$("rdig").textContent=H+":"+(M<10?"0":"")+M;
+var n=Math.floor(M/5),k=M%5,mt;
+if(M===0)mt="긴바늘이 12에 있어요 → 정각";
+else if(k===0)mt="긴바늘이 "+n+"에 있어요 → "+n+"×5 = "+M+"분";
+else mt="긴바늘이 "+n+"을 지나 작은 눈금 "+k+"칸 → "+n+"×5+"+k+" = "+M+"분";
+$("rhint").innerHTML=(M===0?"짧은바늘이 "+H+"을 가리켜요.":"짧은바늘이 "+H+"을 지났어요.")+"<br>"+mt}
+function move(e){var p=pinfo(e);
+if(drag==="m"){var mm=Math.round(p.a/6)%60,d=mm-t%60;if(d>30)d-=60;if(d<-30)d+=60;t=(t+d+720)%720}
+else{var m0=t%60,hr=((Math.round((p.a-m0/2)/30)%12)+12)%12;t=hr*60+m0}
+render()}
+svg.addEventListener("pointerdown",function(e){if(!practice)return;var p=pinfo(e),dh=diff(p.a,t*.5),dm=diff(p.a,(t%60)*6);if(p.r<48)dm+=40;drag=dh<dm?"h":"m";if(svg.setPointerCapture)svg.setPointerCapture(e.pointerId);move(e);e.preventDefault()});
+svg.addEventListener("pointermove",function(e){if(drag)move(e)});
+["pointerup","pointercancel"].forEach(function(n){svg.addEventListener(n,function(){drag=null})});
+[].forEach.call($("tools").children,function(b){b.onclick=function(){t=(t+ +b.dataset.d+720)%720;render()}});
+function setMode(p){
+practice=p;drag=null;
+[].forEach.call($("modes").children,function(b){b.setAttribute("aria-pressed",(b.dataset.m==="1")===p)});
+svg.classList.toggle("free",p);
+var q=p?"none":"",r=p?"":"none";
+["levels","ask","go","msg"].forEach(function(i){$(i).style.display=q});
+document.querySelector(".inputs").style.display=q;
+document.querySelector(".score").style.display=q;
+$("read").style.display=r;$("tools").style.display=r;
+if(p){clearTimeout(timer);t=((h%12)*60+m)%720;render()}else next()}
+[].forEach.call($("modes").children,function(b){b.onclick=function(){setMode(b.dataset.m==="1")}});
+["hi","mi"].forEach(function(i){$(i).addEventListener("keydown",function(e){if(e.key==="Enter")check()})});
+next();
+})();
+</script>
+</body>
+</html>
