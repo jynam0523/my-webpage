@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✨ 수학 대모험 | 연산 게임</title>
+<style>
+:root{--ink:#26324b;--muted:#71809b;--purple:#7057e8;--pink:#ff7ca8;--yellow:#ffd66b;--mint:#69d8bd;--bg:#f5f6ff;--card:#fff;--line:#e8eafa;--shadow:0 12px 32px rgba(53,60,115,.09)}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 8% 0%,#eeeaff 0,transparent 28%),radial-gradient(circle at 100% 10%,#fff0f5 0,transparent 24%),var(--bg);font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;color:var(--ink)}
+button,input,select{font:inherit}button{cursor:pointer;border:0}.wrap{max-width:1120px;margin:auto;padding:24px 22px 56px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}.brand{display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,var(--purple),#a78bfa);display:grid;place-items:center;color:white;font-size:25px;box-shadow:0 8px 18px #7057e844}.brand h1{font-size:23px;margin:0;letter-spacing:-.8px}.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}.top-stats{display:flex;gap:9px;flex-wrap:wrap}.pill{background:white;border:1px solid var(--line);border-radius:999px;padding:9px 14px;font-weight:800;font-size:13px;box-shadow:0 4px 12px #35406b0b}
+.hero{background:linear-gradient(115deg,#7057e8,#8e78f2 58%,#b09cf8);color:white;border-radius:26px;padding:25px 28px;display:flex;justify-content:space-between;align-items:center;gap:18px;box-shadow:0 16px 30px #7057e82b;margin-bottom:20px;overflow:hidden;position:relative}.hero:after{content:"✦";position:absolute;font-size:140px;right:18%;top:-55px;color:#ffffff18}.hero h2{font-size:26px;margin:0 0 7px;letter-spacing:-1px}.hero p{margin:0;color:#eeeaff;font-size:14px}.hero-character{font-size:66px;filter:drop-shadow(0 8px 4px #4532a344);z-index:1;animation:bob 2.5s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-8px)}}
+.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}.panel{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:21px;box-shadow:var(--shadow)}.panel h3{margin:0 0 15px;font-size:17px}.section-label{font-size:12px;color:var(--muted);font-weight:800;margin:18px 0 9px;display:block}
+.mode-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.mode{background:#fafaff;border:1.5px solid var(--line);border-radius:15px;padding:13px;text-align:left;transition:.18s}.mode strong{display:block;font-size:14px}.mode small{color:var(--muted);font-size:11px}.mode.active{border-color:var(--purple);background:#f1efff;box-shadow:inset 0 0 0 1px var(--purple)}.mode .ico{font-size:21px;float:right}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{padding:9px 13px;border-radius:999px;background:#f5f6fc;color:#596680;border:1px solid var(--line);font-size:12px;font-weight:750}.chip.on{background:#eeeaff;border-color:#a99af8;color:#5b45cf}
+select{border:1px solid var(--line);background:#fafaff;border-radius:11px;padding:10px 12px;color:var(--ink);width:100%}.start{margin-top:18px;width:100%;padding:14px;border-radius:14px;background:linear-gradient(100deg,var(--purple),#917cf0);color:white;font-weight:900;font-size:15px;box-shadow:0 8px 16px #7057e833}.start:hover{filter:brightness(1.04);transform:translateY(-1px)}
+.profile{display:flex;align-items:center;gap:14px;background:#fbfaff;padding:14px;border-radius:16px}.avatar{width:62px;height:62px;border-radius:20px;background:#fff0c9;display:grid;place-items:center;font-size:38px}.profile h4{margin:0 0 4px}.profile p{margin:0;color:var(--muted);font-size:12px}.bar{height:9px;background:#ececf7;border-radius:99px;overflow:hidden;margin-top:9px}.bar span{height:100%;display:block;background:linear-gradient(90deg,#8d78f0,#ff91b5);border-radius:99px;width:0%;transition:width .3s}
+.mini-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:12px}.stat{background:#fafaff;border:1px solid var(--line);padding:12px;border-radius:14px}.stat b{font-size:21px;display:block}.stat small{color:var(--muted);font-size:11px}
+.badges{display:flex;gap:8px;flex-wrap:wrap}.badge{background:#fff8e5;border:1px solid #ffebad;border-radius:12px;padding:8px 10px;font-size:12px}.badge.lock{filter:grayscale(1);opacity:.42;background:#f6f6f8;border-color:#eee}.tabs{display:flex;gap:8px;margin:20px 0 12px}.tab{padding:10px 14px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--muted);font-size:12px;font-weight:800}.tab.active{background:#26324b;color:white;border-color:#26324b}
+.game{display:none;margin-top:16px}.game.show{display:block}.game-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.game-head h3{margin:0}.timer{font-weight:900;color:#e56b91}.question-box{margin:18px 0;background:linear-gradient(135deg,#f6f3ff,#fff6fa);border:1px solid #eee7ff;border-radius:20px;padding:25px;text-align:center}.q-meta{color:var(--muted);font-size:12px;font-weight:800}.question{font-size:clamp(34px,7vw,54px);font-weight:950;letter-spacing:-2px;margin:9px 0 18px}.answer-row{display:flex;justify-content:center;gap:8px}.answer-row input{width:min(220px,65%);padding:13px;border:2px solid #dedaf8;border-radius:13px;text-align:center;font-size:22px;font-weight:850;outline:none}.answer-row input:focus{border-color:var(--purple)}.answer-row button{padding:0 20px;border-radius:13px;background:var(--purple);color:white;font-weight:850}.feedback{min-height:30px;text-align:center;font-weight:850;margin-top:12px}.feedback.good{color:#19a783}.feedback.bad{color:#e36b8b}.game-actions{display:flex;justify-content:space-between;align-items:center;gap:10px}.subbtn{background:#f1f2fa;color:#5c6680;border-radius:11px;padding:10px 13px;font-weight:750;font-size:12px}.progress{height:8px;background:#eff0f8;border-radius:99px;overflow:hidden;margin:12px 0}.progress span{display:block;height:100%;width:0;background:var(--mint);transition:width .2s}
+.result{text-align:center;padding:22px 10px}.result .big{font-size:58px}.result h2{margin:6px 0}.result p{color:var(--muted)}.result strong{color:var(--purple)}
+.lower{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}.wrong-list{max-height:180px;overflow:auto}.wrong-item{padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;display:flex;justify-content:space-between;gap:8px}.wrong-item span{color:var(--muted)}.empty{color:#9aa3b6;font-size:13px;padding:10px 0}.history{font-size:12px;color:var(--muted);line-height:1.8}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:#26324b;color:white;padding:12px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:5;font-size:13px;font-weight:800}.toast.show{opacity:1;transform:translate(-50%,0)}
+.confetti{animation:pop .55s ease}@keyframes pop{0%{transform:scale(.7);opacity:.4}65%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+@media(max-width:760px){.grid,.lower{grid-template-columns:1fr}.hero{padding:20px}.hero h2{font-size:21px}.top-stats{justify-content:flex-end}.wrap{padding:16px 13px 40px}.panel{padding:17px}.brand h1{font-size:19px}}
+</style>
+
+<style id="deluxe-theme">
+:root{
+ --ink:#202447;--muted:#74799b;--purple:#6746e8;--pink:#ff5fa2;
+ --bg:#111735;--card:#20294f;--line:#3a4778;--shadow:0 18px 45px #05091f88;
+}
+body{
+ color:#f7f5ff;
+ background:
+  radial-gradient(ellipse at 12% 8%,#7446d966 0,transparent 34%),
+  radial-gradient(ellipse at 90% 22%,#ff5fa233 0,transparent 28%),
+  radial-gradient(ellipse at 50% 100%,#1bc9c033 0,transparent 35%),
+  #111735;
+}
+body:before{
+ content:"";position:fixed;inset:0;pointer-events:none;opacity:.35;z-index:-1;
+ background-image:radial-gradient(#fff 1px,transparent 1px),radial-gradient(#a9a0ff 1px,transparent 1px);
+ background-size:47px 47px,83px 83px;background-position:0 0,21px 17px;
+}
+.brand h1{color:#fff;text-shadow:0 3px 0 #4730a2,0 0 22px #a18cff88}
+.brand p{color:#b9b5e9}
+.logo{background:linear-gradient(145deg,#ffcf5c,#ff7b9f 48%,#845bff);box-shadow:0 0 0 4px #ffffff12,0 8px 25px #ff78b555}
+.pill{background:#252f59;border:1px solid #4b5688;color:#fff;box-shadow:0 7px 18px #05091f55}
+.hero{
+ border:1px solid #b9a8ff55;
+ background:linear-gradient(115deg,#5535c9 0%,#764de8 48%,#d34f9a 100%);
+ box-shadow:0 18px 40px #673fe966,inset 0 1px 0 #ffffff55;
+}
+.hero:before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 20%,#ffffff13 45%,transparent 68%);transform:translateX(-100%);animation:shine 6s infinite}
+@keyframes shine{to{transform:translateX(100%)}}
+.hero:after{content:"✦  ✧  ✦";font-size:48px;letter-spacing:20px;right:3%;top:4px;color:#fff4;transform:rotate(-12deg)}
+.hero h2{color:#fff;text-shadow:0 3px 0 #43279b}
+.hero p{color:#f0eaff}
+.hero-character{font-size:76px;filter:drop-shadow(0 10px 0 #44268b66) drop-shadow(0 0 18px #ffe28a99)}
+.panel{
+ background:linear-gradient(145deg,#252f59,#1c2549);
+ border:1px solid #47558b;box-shadow:var(--shadow),inset 0 1px 0 #ffffff0c;
+ color:#f8f7ff;position:relative;overflow:hidden
+}
+.panel:before{content:"";position:absolute;top:0;left:18px;right:18px;height:2px;background:linear-gradient(90deg,transparent,#a99aff,transparent);opacity:.65}
+.panel h3{color:#fff}
+.section-label{color:#b6b9dc}
+.mode{
+ background:linear-gradient(145deg,#303b6a,#252f57);border:1px solid #4c598b;color:#fff;
+ box-shadow:0 6px 0 #161e3c;transition:transform .18s,box-shadow .18s,border-color .18s
+}
+.mode:hover{transform:translateY(-3px);box-shadow:0 9px 0 #161e3c,0 12px 22px #090e2b88}
+.mode small{color:#c0c4e5}
+.mode.active{background:linear-gradient(145deg,#5140a6,#393b83);border:1px solid #c2aaff;box-shadow:0 0 0 2px #9b7dff33,0 6px 0 #211d55,0 0 24px #9274ff55}
+.chip{background:#303a65;color:#d4d7f1;border-color:#4a5686}
+.chip.on{background:linear-gradient(120deg,#7555ef,#a15be7);color:#fff;border-color:#c6adff;box-shadow:0 0 15px #9672ff55}
+select{background:#303a65;color:#fff;border-color:#536091}
+.profile,.stat{background:linear-gradient(145deg,#303a68,#252f57);border:1px solid #47558b;color:#fff}
+.profile p,.stat small{color:#c0c5e7}
+.avatar{background:linear-gradient(145deg,#ffe38d,#ff9eaa);box-shadow:0 6px 0 #a65d83}
+.bar{background:#151d3c;height:11px;border:1px solid #4a5686}
+.bar span{background:linear-gradient(90deg,#48e0c0,#ffe16f,#ff80b7);box-shadow:0 0 12px #7af0d8}
+.badge{background:linear-gradient(145deg,#66502c,#443b37);border:1px solid #c79b4c;color:#ffe6a2;box-shadow:0 4px 12px #080d27}
+.badge.lock{background:#303653;border-color:#4a5272;color:#a9aec8}
+.tab{background:#2c365f;border-color:#4b5788;color:#c7cbed}
+.tab.active{background:linear-gradient(100deg,#7656ee,#d653a0);border-color:#d6b7ff;color:white;box-shadow:0 5px 18px #a45aff55}
+.game{border-color:#9b83ff;box-shadow:0 0 0 2px #9b83ff22,0 20px 50px #070b25aa}
+.timer{color:#ff9abb;text-shadow:0 0 12px #ff5fa288}
+.question-box{background:radial-gradient(circle at 50% 0,#fff4d833,transparent 48%),linear-gradient(145deg,#37356e,#292c5a);border:1px solid #7869ba;box-shadow:inset 0 1px 0 #ffffff22,0 10px 25px #0b102c66}
+.q-meta{color:#c4c3ed}
+.question{color:#fff;text-shadow:0 4px 0 #55419b,0 0 24px #a88aff77}
+.answer-row input{background:#171f43;color:#fff;border:2px solid #7669bb;box-shadow:inset 0 3px 8px #080d25}
+.answer-row input::placeholder{color:#9299c4}
+.answer-row button,.start{background:linear-gradient(110deg,#ffb84e,#ff6c9e 55%,#9b66ff);color:#fff;text-shadow:0 1px 2px #6b3277;box-shadow:0 6px 0 #763d94,0 12px 22px #d54f9b44;transition:transform .15s,filter .15s}
+.answer-row button:hover,.start:hover{filter:brightness(1.12);transform:translateY(-2px)}
+.answer-row button:active,.start:active{transform:translateY(3px);box-shadow:0 2px 0 #763d94}
+.feedback.good{color:#6df0c7;text-shadow:0 0 12px #45e7bc77}
+.feedback.bad{color:#ff9ab5}
+.subbtn{background:#35416e;color:#e2e4ff;border:1px solid #566397}
+.game-actions span{color:#c0c5e7!important}
+.progress{background:#171f43;border:1px solid #47558b}
+.progress span{background:linear-gradient(90deg,#4ce2c4,#ffdc70,#ff78b0);box-shadow:0 0 12px #6fe7d0}
+.result .big{filter:drop-shadow(0 8px 12px #ffcf6b55);animation:bob 1.8s ease-in-out infinite}
+.result h2{color:#ffe18a;text-shadow:0 3px 0 #8c4d9e}
+.result p{color:#d1d4f2}
+.wrong-item{border-color:#414d7d;color:#f4f2ff}
+.wrong-item span,.empty,.history{color:#b7bfdf}
+.toast{background:linear-gradient(100deg,#6247d9,#d64e9b);box-shadow:0 10px 30px #090d2b88;border:1px solid #ffffff44}
+@media(max-width:760px){.hero-character{font-size:58px}.hero:after{font-size:30px}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+<header>
+ <div class="brand"><div class="logo">✦</div><div><h1>수학 대모험</h1><p>PLAY · THINK · LEVEL UP</p></div></div>
+ <div class="top-stats"><div class="pill">⭐ <span id="headXp">0</span> XP</div><div class="pill">🔥 <span id="headStreak">0</span>일 연속</div></div>
+</header>
+<section class="hero"><div><h2>오늘의 수학 모험을 시작해 볼까?</h2><p>문제를 풀고 경험치를 모아 나만의 수학 탐험가로 성장해 봐!</p></div><div class="hero-character" id="heroChar">🧙</div></section>
+
+<div class="grid">
+ <section class="panel">
+  <h3>🎮 모험 모드 선택</h3>
+  <div class="mode-grid">
+   <button class="mode active" data-mode="time"><span class="ico">⏱️</span><strong>타임어택</strong><small>60초 동안 최대한 많이!</small></button>
+   <button class="mode" data-mode="endless"><span class="ico">♾️</span><strong>무한 모드</strong><small>시간 제한 없이 연습하기</small></button>
+   <button class="mode" data-mode="challenge"><span class="ico">🏆</span><strong>챌린지</strong><small>10문제 연속 정답에 도전!</small></button>
+   <button class="mode" data-mode="master"><span class="ico">👑</span><strong>마스터전</strong><small>혼합 연산 5문제 클리어</small></button>
+  </div>
+  <span class="section-label">연산 종류</span>
+  <div class="chips" id="ops">
+   <button class="chip on" data-op="add">＋ 덧셈</button><button class="chip on" data-op="sub">− 뺄셈</button><button class="chip" data-op="mul">× 곱셈</button><button class="chip" data-op="div">÷ 나눗셈</button><button class="chip" data-op="mix">🎲 혼합</button>
+  </div>
+  <span class="section-label">난이도</span>
+  <div class="chips" id="levels">
+   <button class="chip on" data-level="easy">🌱 초급 (1~10)</button><button class="chip" data-level="mid">🚀 중급 (1~50)</button><button class="chip" data-level="hard">🔥 고급 (1~100)</button>
+  </div>
+  <button class="start" id="startBtn">모험 시작하기 →</button>
+ </section>
+ <aside class="panel">
+  <h3>🧑‍🚀 나의 탐험가</h3>
+  <div class="profile"><div class="avatar" id="avatar">🧙</div><div style="flex:1"><h4 id="levelName">수습 탐험가 · Lv.1</h4><p><span id="xpText">0</span> / <span id="nextXp">100</span> XP</p><div class="bar"><span id="xpBar"></span></div></div></div>
+  <div class="mini-stats">
+   <div class="stat"><b id="totalSolved">0</b><small>누적 문제</small></div><div class="stat"><b id="accuracy">0%</b><small>전체 정답률</small></div>
+   <div class="stat"><b id="bestScore">0</b><small>타임어택 최고 점수</small></div><div class="stat"><b id="totalDays">0</b><small>총 학습 일수</small></div>
+  </div>
+  <span class="section-label">🏅 획득한 배지</span><div class="badges" id="badges"></div>
+ </aside>
+</div>
+
+<section class="panel game" id="game">
+ <div class="game-head"><h3 id="gameTitle">⏱️ 타임어택</h3><div class="timer" id="timer">60초</div></div>
+ <div class="progress"><span id="gameProgress"></span></div>
+ <div id="playArea">
+  <div class="question-box"><div class="q-meta" id="qMeta">문제 1</div><div class="question" id="question">8 + 3 = ?</div>
+   <div class="answer-row"><input id="answer" type="number" inputmode="numeric" placeholder="정답 입력" autocomplete="off"><button id="submit">확인!</button></div>
+   <div class="feedback" id="feedback" aria-live="polite"></div>
+  </div>
+  <div class="game-actions"><span style="font-size:12px;color:var(--muted)">연속 정답 🔥 <b id="combo">0</b></span><button class="subbtn" id="quit">그만하기</button></div>
+ </div>
+ <div class="result" id="result" style="display:none"><div class="big" id="resultEmoji">🎉</div><h2 id="resultTitle">모험 완료!</h2><p id="resultText"></p><button class="start" id="again">다시 모험하기</button></div>
+</section>
+
+<div class="lower">
+ <section class="panel"><h3>📒 다시 도전할 문제</h3><div class="wrong-list" id="wrongList"><div class="empty">아직 오답이 없어! 멋진 시작이야 ✨</div></div></section>
+ <section class="panel"><h3>📊 최근 학습 기록</h3><div class="history" id="history">학습을 시작하면 기록이 여기에 쌓여요.</div></section>
+</div>
+<p style="text-align:center;color:#a0a8ba;font-size:11px;margin:22px 0 0">학습 기록은 이 브라우저에 저장돼요. 다른 기기나 브라우저와 자동으로 동기화되지는 않아요.</p>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const KEY='mathAdventureSave_v1';
+const fresh=()=>({xp:0,total:0,correct:0,best:0,days:[],lastDate:null,wrong:[],history:[],badges:[]});
+let data;try{data={...fresh(),...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){data=fresh()}
+let mode='time',level='easy',ops=['add','sub'],q=null,active=false,remaining=60,solved=0,sessionCorrect=0,combo=0,sessionWrong=[],timerId=null,questionNo=0;
+const $=id=>document.getElementById(id);
+const today=()=>new Date().toISOString().slice(0,10);
+function save(){localStorage.setItem(KEY,JSON.stringify(data));renderStats()}
+function toast(t){$('toast').textContent=t;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),1900)}
+const badgeDefs=[['first','🌟','첫 발걸음','첫 문제 풀기'],['ten','🔟','연산 새싹','누적 10문제'],['fifty','💯','연습왕','누적 50문제'],['perfect','🎯','정확한 계산','한 판 100% 정답'],['combo','🔥','콤보 마스터','5문제 연속 정답'],['streak3','📅','꾸준한 탐험가','3일 연속 학습'],['master','👑','마스터 클리어','마스터전 성공']];
+function award(id){if(!data.badges.includes(id)){data.badges.push(id);toast('새 배지 획득! '+badgeDefs.find(b=>b[0]===id)[1]+' '+badgeDefs.find(b=>b[0]===id)[2])}}
+function streak(){let ds=[...data.days].sort();if(!ds.length)return 0;let n=1;for(let i=ds.length-1;i>0;i--){let a=new Date(ds[i-1]+'T00:00:00'),b=new Date(ds[i]+'T00:00:00');if((b-a)/86400000===1)n++;else break}return ds.at(-1)===today()?n:(ds.at(-1)===new Date(Date.now()-86400000).toISOString().slice(0,10)?n:0)}
+function renderStats(){
+ $('headXp').textContent=data.xp;$('headStreak').textContent=streak();$('xpText').textContent=data.xp%100;$('nextXp').textContent=100;
+ let lv=Math.floor(data.xp/100)+1;$('levelName').textContent=(['수습 탐험가','용감한 탐험가','숙련 탐험가','전설의 탐험가'][Math.min(3,Math.floor((lv-1)/5))])+' · Lv.'+lv;
+ $('xpBar').style.width=(data.xp%100)+'%';$('avatar').textContent=['🧙','🧝','🦸','🧑‍🚀'][Math.min(3,Math.floor((lv-1)/5))];$('heroChar').textContent=$('avatar').textContent;
+ $('totalSolved').textContent=data.total;$('accuracy').textContent=(data.total?Math.round(data.correct/data.total*100):0)+'%';$('bestScore').textContent=data.best;$('totalDays').textContent=data.days.length;
+ $('badges').innerHTML=badgeDefs.map(b=>`<div class="badge ${data.badges.includes(b[0])?'':'lock'}" title="${b[3]}">${b[1]} ${b[2]}</div>`).join('');
+ $('wrongList').innerHTML=data.wrong.length?data.wrong.slice(-12).reverse().map(w=>`<div class="wrong-item"><b>${w.a} ${w.op} ${w.b} = ${w.answer}</b><span>내 답: ${w.given}</span></div>`).join(''):'<div class="empty">아직 오답이 없어! 멋진 시작이야 ✨</div>';
+ $('history').innerHTML=data.history.length?data.history.slice(-5).reverse().map(h=>`${h.date} · ${h.mode} · ${h.correct}/${h.total} 정답 · +${h.xp} XP`).join('<br>'):'학습을 시작하면 기록이 여기에 쌓여요.';
+}
+document.querySelectorAll('.mode').forEach(b=>b.onclick=()=>{document.querySelectorAll('.mode').forEach(x=>x.classList.remove('active'));b.classList.add('active');mode=b.dataset.mode});
+document.querySelectorAll('#ops .chip').forEach(b=>b.onclick=()=>{let op=b.dataset.op;if(op==='mix'){ops=['mix'];document.querySelectorAll('#ops .chip').forEach(x=>x.classList.toggle('on',x===b))}else{ops=ops.filter(x=>x!=='mix');if(ops.includes(op))ops=ops.filter(x=>x!==op);else ops.push(op);document.querySelectorAll('#ops .chip').forEach(x=>x.classList.toggle('on',ops.includes(x.dataset.op)))}if(!ops.length){ops=['add'];document.querySelector('[data-op="add"]').classList.add('on')}});
+document.querySelectorAll('#levels .chip').forEach(b=>b.onclick=()=>{document.querySelectorAll('#levels .chip').forEach(x=>x.classList.remove('on'));b.classList.add('on');level=b.dataset.level});
+const symbols={add:'+',sub:'−',mul:'×',div:'÷'};
+function makeQuestion(){
+ let pool=ops.includes('mix')?['add','sub','mul','div']:ops;let op=pool[Math.floor(Math.random()*pool.length)];
+ let max={easy:10,mid:50,hard:100}[level],a,b,ans;
+ if(op==='add'){a=rand(1,max);b=rand(1,max);ans=a+b}
+ if(op==='sub'){a=rand(1,max);b=rand(1,max);if(b>a)[a,b]=[b,a];ans=a-b}
+ if(op==='mul'){a=rand(1,level==='easy'?10:level==='mid'?12:20);b=rand(1,level==='easy'?10:level==='mid'?12:20);ans=a*b}
+ if(op==='div'){b=rand(1,level==='easy'?10:level==='mid'?12:20);ans=rand(1,level==='easy'?10:level==='mid'?12:20);a=b*ans}
+ return {a,b,op,answer:ans}
+}
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+function start(){
+ clearInterval(timerId);active=true;remaining=60;solved=0;sessionCorrect=0;combo=0;sessionWrong=[];questionNo=0;
+ $('game').classList.add('show');$('playArea').style.display='block';$('result').style.display='none';$('gameTitle').textContent={time:'⏱️ 타임어택',endless:'♾️ 무한 모드',challenge:'🏆 챌린지',master:'👑 마스터전'}[mode];
+ $('timer').textContent=mode==='time'?'60초':mode==='challenge'?'목표: 10연속':'진행 중';$('gameProgress').style.width='0%';next();
+ if(mode==='time')timerId=setInterval(()=>{remaining--;$('timer').textContent=remaining+'초';if(remaining<=0)finish('time')},1000);
+}
+function next(){if(!active)return;q=makeQuestion();questionNo++;$('qMeta').textContent=mode==='master'?`마스터 문제 ${questionNo} / 5`:mode==='challenge'?`연속 정답 ${combo} / 10`:`문제 ${solved+1}`;$('question').textContent=`${q.a} ${symbols[q.op]} ${q.b} = ?`;$('answer').value='';$('answer').focus();$('feedback').textContent='';$('feedback').className='feedback';$('combo').textContent=combo;$('gameProgress').style.width=(mode==='master'?solved/5*100:mode==='challenge'?combo/10*100:0)+'%'}
+function submit(){
+ if(!active)return;let val=$('answer').value.trim();if(val===''){toast('정답을 입력해 줘!');return}
+ let given=Number(val);solved++;data.total++;
+ if(given===q.answer){sessionCorrect++;data.correct++;combo++;let gain=10+(combo>=3?5:0);data.xp+=gain;$('feedback').textContent=['정답이야! ✨','멋져! 계속 가 보자! 🎉','완벽해! 🚀'][Math.floor(Math.random()*3)]+` +${gain} XP`;$('feedback').className='feedback good confetti';if(combo===5)award('combo');if(data.total===1)award('first');if(data.total>=10)award('ten');if(data.total>=50)award('fifty')}
+ else{combo=0;sessionWrong.push({a:q.a,b:q.b,op:symbols[q.op],answer:q.answer,given});data.wrong.push({a:q.a,b:q.b,op:symbols[q.op],answer:q.answer,given});if(data.wrong.length>100)data.wrong.shift();$('feedback').textContent=`괜찮아! 정답은 ${q.answer}야 💪`;$('feedback').className='feedback bad'}
+ let date=today();if(!data.days.includes(date))data.days.push(date);if(streak()>=3)award('streak3');if(data.total>=1)award('first');
+ save();$('combo').textContent=combo;
+ if(mode==='challenge'&&combo>=10){finish('challenge');return}
+ if(mode==='master'&&solved>=5){if(sessionCorrect===5)award('master');finish('master');return}
+ if(mode==='time'&&remaining<=0){finish('time');return}
+ setTimeout(()=>{if(active)next()},650);
+}
+function finish(reason){
+ if(!active)return;active=false;clearInterval(timerId);$('playArea').style.display='none';$('result').style.display='block';
+ let xpEarned=sessionCorrect*10+Math.max(0,sessionCorrect-2)*5;
+ if(sessionCorrect===solved&&solved>0)award('perfect');
+ if(reason==='master'&&sessionCorrect===5){$('resultEmoji').textContent='👑';$('resultTitle').textContent='마스터 등극!';$('resultText').textContent=`5문제를 모두 맞혔어! 보너스 50 XP를 획득했어.`;data.xp+=50;xpEarned+=50}
+ else if(reason==='challenge'&&combo>=10){$('resultEmoji').textContent='🏆';$('resultTitle').textContent='챌린지 성공!';$('resultText').textContent='10문제 연속 정답! 정말 대단해!';data.xp+=30;xpEarned+=30}
+ else{$('resultEmoji').textContent=reason==='time'?'⏱️':'🌟';$('resultTitle').textContent=reason==='time'?'타임어택 종료!':'모험 완료!';$('resultText').textContent=`${solved}문제 중 ${sessionCorrect}문제 정답! 정확도 ${solved?Math.round(sessionCorrect/solved*100):0}% · 획득 XP ${xpEarned}`}
+ if(mode==='time')data.best=Math.max(data.best,sessionCorrect);
+ if(solved>0){data.history.push({date:today(),mode:{time:'타임어택',endless:'무한 모드',challenge:'챌린지',master:'마스터전'}[mode],correct:sessionCorrect,total:solved,xp:xpEarned});if(data.history.length>30)data.history.shift()}
+ save();$('timer').textContent='완료';$('gameProgress').style.width='100%';
+}
+$('startBtn').onclick=start;$('submit').onclick=submit;$('answer').addEventListener('keydown',e=>{if(e.key==='Enter')submit()});$('quit').onclick=()=>{if(active)finish('quit')};$('again').onclick=start;
+renderStats();
+</script>
+</body>
+</html>
