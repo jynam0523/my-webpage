@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>3D 주사위 시뮬레이터</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--text:#1f2430;--muted:#6b7280;--line:#e3e6ee;--accent:#4f6bed;--bar:#4f6bed;--ref:#e5484d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14161c;--card:#1d2029;--text:#eceef4;--muted:#9aa1b2;--line:#2c303c;--accent:#7b93ff;--bar:#7b93ff;--ref:#ff7b80}}
+:root[data-theme="dark"]{--bg:#14161c;--card:#1d2029;--text:#eceef4;--muted:#9aa1b2;--line:#2c303c;--accent:#7b93ff;--bar:#7b93ff;--ref:#ff7b80}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Noto Sans KR","Malgun Gothic",sans-serif}
+main{max-width:1000px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:4px 0 14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+h2{font-size:15px;margin:0 0 10px;color:var(--muted);font-weight:600}
+#stage{width:100%;height:280px;border-radius:10px;overflow:hidden}
+#stage canvas{display:block;width:100%;height:100%}
+.result{text-align:center;font-size:15px;margin:8px 0;min-height:22px}
+.result b{font-size:22px;color:var(--accent)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font:inherit;padding:9px 14px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.danger{color:var(--ref)}
+button:disabled{opacity:.5;cursor:default}
+input{font:inherit;width:90px;padding:8px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+.chart{height:220px;display:flex;align-items:flex-end;gap:10px;padding:8px 6px 0;position:relative;border-bottom:1px solid var(--line)}
+.col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+.bar{width:100%;max-width:56px;background:var(--bar);border-radius:6px 6px 0 0;transition:height .35s ease;min-height:0}
+.val{font-size:12px;color:var(--muted);margin-bottom:3px}
+.labels{display:flex;gap:10px;padding:4px 6px;font-size:13px}
+.labels div{flex:1;text-align:center}
+.ref{position:absolute;left:0;right:0;border-top:2px dashed var(--ref);pointer-events:none}
+.ref span{position:absolute;right:0;top:-18px;font-size:11px;color:var(--ref)}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px;text-align:center}
+th,td{padding:7px 6px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600}
+tfoot td{font-weight:700;border-bottom:0}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+</style>
+</head>
+<body>
+<main>
+<h1>🎲 3D 주사위 시뮬레이터</h1>
+<div class="grid">
+  <section class="card">
+    <h2>주사위 굴리기</h2>
+    <div id="stage"></div>
+    <div class="result" id="res">버튼을 눌러 주사위를 굴려 보세요.</div>
+    <div class="btns">
+      <button class="primary" data-n="1">1회</button>
+      <button class="primary" data-n="10">10회</button>
+      <button class="primary" data-n="100">100회</button>
+      <input id="custom" type="number" min="1" max="100000" value="1000" aria-label="사용자 지정 횟수">
+      <button id="customBtn">지정 횟수</button>
+      <button class="danger" id="reset">초기화</button>
+    </div>
+    <div class="note">여러 번 굴릴 때는 결과를 즉시 집계하고, 주사위는 마지막 결과로 굴러갑니다.</div>
+  </section>
+  <section class="card">
+    <h2>출현 빈도 막대그래프 (%)</h2>
+    <div class="chart" id="chart"></div>
+    <div class="labels" id="labels"></div>
+    <div class="note">빨간 점선: 이론 확률 16.67% (1/6)</div>
+  </section>
+</div>
+<section class="card" style="margin-top:14px">
+  <h2>집계표</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>눈</th><th>출현 횟수</th><th>백분율(%)</th><th>이론값과의 차이(%p)</th></tr></thead>
+    <tbody id="tbody"></tbody>
+    <tfoot><tr><td>합계</td><td id="total">0</td><td id="totalPct">0.00</td><td>-</td></tr></tfoot>
+  </table>
+  </div>
+</section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  var counts=[0,0,0,0,0,0], total=0;
+  var chart=document.getElementById('chart'), labels=document.getElementById('labels'), tbody=document.getElementById('tbody');
+  var bars=[], vals=[];
+  for(var i=0;i<6;i++){
+    var col=document.createElement('div');col.className='col';
+    var v=document.createElement('div');v.className='val';v.textContent='0%';
+    var b=document.createElement('div');b.className='bar';b.style.height='0%';
+    col.appendChild(v);col.appendChild(b);chart.appendChild(col);
+    bars.push(b);vals.push(v);
+    var l=document.createElement('div');l.textContent=(i+1);labels.appendChild(l);
+    var tr=document.createElement('tr');tr.innerHTML='<td>'+(i+1)+'</td><td></td><td></td><td></td>';tbody.appendChild(tr);
+  }
+  var ref=document.createElement('div');ref.className='ref';ref.innerHTML='<span>16.67%</span>';chart.appendChild(ref);
+
+  function render(){
+    var pcts=counts.map(function(c){return total?c/total*100:0});
+    var max=Math.max(30,Math.ceil(Math.max.apply(null,pcts)/10)*10+5);
+    for(var i=0;i<6;i++){
+      bars[i].style.height=(pcts[i]/max*100)+'%';
+      vals[i].textContent=pcts[i].toFixed(1)+'%';
+      var cells=tbody.children[i].children;
+      cells[1].textContent=counts[i].toLocaleString();
+      cells[2].textContent=pcts[i].toFixed(2);
+      cells[3].textContent=total?((pcts[i]-100/6>=0?'+':'')+(pcts[i]-100/6).toFixed(2)):'-';
+    }
+    ref.style.bottom=((100/6)/max*100)+'%';
+    document.getElementById('total').textContent=total.toLocaleString();
+    document.getElementById('totalPct').textContent=total?'100.00':'0.00';
+  }
+  render();
+
+  // Three.js
+  var stage=document.getElementById('stage');
+  var renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  stage.appendChild(renderer.domElement);
+  var scene=new THREE.Scene();
+  var camera=new THREE.PerspectiveCamera(40,1,0.1,100);
+  camera.position.set(0,5,7.5);camera.lookAt(0,0.6,0);
+  scene.add(new THREE.AmbientLight(0xffffff,0.75));
+  var dl=new THREE.DirectionalLight(0xffffff,0.8);dl.position.set(4,8,5);scene.add(dl);
+  function resize(){
+    var w=stage.clientWidth,h=stage.clientHeight;
+    renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize',resize);resize();
+
+  function faceTex(n){
+    var c=document.createElement('canvas');c.width=c.height=128;
+    var x=c.getContext('2d');
+    x.fillStyle='#fdfdfb';x.fillRect(0,0,128,128);
+    x.strokeStyle='#d5d7de';x.lineWidth=6;x.strokeRect(3,3,122,122);
+    var p={1:[[2,2]],2:[[1,1],[3,3]],3:[[1,1],[2,2],[3,3]],4:[[1,1],[1,3],[3,1],[3,3]],5:[[1,1],[1,3],[2,2],[3,1],[3,3]],6:[[1,1],[1,2],[1,3],[3,1],[3,2],[3,3]]}[n];
+    p.forEach(function(q){
+      x.beginPath();x.arc(q[0]*32,q[1]*32,n===1?17:10,0,7);
+      x.fillStyle=n===1?'#e5484d':'#1f2430';x.fill();
+    });
+    return new THREE.CanvasTexture(c);
+  }
+  // 재질 순서: +x,-x,+y,-y,+z,-z (마주보는 면의 합 = 7)
+  var order=[1,6,2,5,3,4];
+  var normals={1:[1,0,0],6:[-1,0,0],2:[0,1,0],5:[0,-1,0],3:[0,0,1],4:[0,0,-1]};
+  var mats=order.map(function(n){return new THREE.MeshStandardMaterial({map:faceTex(n),roughness:0.35})});
+  var dice=new THREE.Mesh(new THREE.BoxGeometry(2,2,2),mats);
+  dice.position.y=1;scene.add(dice);
+  var floor=new THREE.Mesh(new THREE.CircleGeometry(4,48),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.12}));
+  floor.rotation.x=-Math.PI/2;scene.add(floor);
+
+  var anim=null;
+  function roll(value,done){
+    var n=normals[value];
+    var qFace=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(n[0],n[1],n[2]),new THREE.Vector3(0,1,0));
+    var qYaw=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),Math.random()*Math.PI*2);
+    var qT=qYaw.multiply(qFace);
+    var axis=new THREE.Vector3(Math.random()-.5,Math.random()-.5,Math.random()-.5).normalize();
+    anim={t0:performance.now(),dur:1300,q0:dice.quaternion.clone(),qT:qT,axis:axis,spins:3+Math.random()*2,done:done};
+  }
+  var tmp=new THREE.Quaternion();
+  function loop(now){
+    requestAnimationFrame(loop);
+    if(anim){
+      var t=Math.min((now-anim.t0)/anim.dur,1);
+      var e=1-Math.pow(1-t,3);
+      dice.quaternion.copy(anim.q0).slerp(anim.qT,e);
+      tmp.setFromAxisAngle(anim.axis,(1-e)*anim.spins*Math.PI*2);
+      dice.quaternion.premultiply(tmp);
+      dice.position.y=1+Math.abs(Math.sin(t*Math.PI*3))*(1-t)*2.4;
+      floor.scale.setScalar(1-(dice.position.y-1)*0.08);
+      if(t>=1){dice.quaternion.copy(anim.qT);dice.position.y=1;var d=anim.done;anim=null;if(d)d();}
+    }
+    renderer.render(scene,camera);
+  }
+  requestAnimationFrame(loop);
+
+  var busy=false, resEl=document.getElementById('res');
+  var ctrl=document.querySelectorAll('button');
+  function setBusy(b){busy=b;ctrl.forEach(function(x){x.disabled=b})}
+  function run(n){
+    if(busy)return;
+    n=Math.max(1,Math.min(100000,Math.floor(n)||1));
+    var last=0,batch=[0,0,0,0,0,0];
+    for(var i=0;i<n;i++){last=1+Math.floor(Math.random()*6);batch[last-1]++}
+    setBusy(true);
+    resEl.textContent='굴리는 중…';
+    roll(last,function(){
+      for(var k=0;k<6;k++)counts[k]+=batch[k];
+      total+=n;render();
+      resEl.innerHTML=(n===1?'나온 눈: ':n.toLocaleString()+'회 굴림 · 마지막 눈: ')+'<b>'+last+'</b>';
+      setBusy(false);
+    });
+  }
+  document.querySelectorAll('[data-n]').forEach(function(b){b.addEventListener('click',function(){run(+b.dataset.n)})});
+  document.getElementById('customBtn').addEventListener('click',function(){run(+document.getElementById('custom').value)});
+  document.getElementById('reset').addEventListener('click',function(){
+    if(busy)return;
+    counts=[0,0,0,0,0,0];total=0;render();
+    resEl.textContent='초기화되었습니다.';
+  });
+})();
+</script>
+</body>
+</html>
