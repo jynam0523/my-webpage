@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>운동 체크리스트 & 기록 관리</title>
+  <meta name="description" content="날짜별 운동 체크리스트, 수치 기록 및 월간 누적 통계 관리 PWA" />
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="운동체크" />
+
+  <!-- 표준 PWA 파일 연결 -->
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+  <link rel="apple-touch-icon" href="./icon.svg" />
+
+  <!-- Tailwind CSS & Chart.js CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: none;
+    }
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 20px);
+    }
+    .check-pop {
+      animation: pop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes pop {
+      0% { transform: scale(0.85); }
+      50% { transform: scale(1.12); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center">
+
+  <!-- 앱 컨테이너 (모바일 앱 뷰 최적화) -->
+  <div class="w-full max-w-lg min-h-screen bg-slate-50 shadow-xl flex flex-col relative">
+
+    <!-- 상단 헤더 -->
+    <header class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 pt-6 pb-5 rounded-b-3xl shadow-md sticky top-0 z-30">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+            <i class="fa-solid fa-dumbbell text-lg"></i>
+          </div>
+          <div>
+            <h1 class="text-lg font-bold tracking-tight leading-tight">운동 체크리스트</h1>
+            <p class="text-[11px] text-blue-100 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
+              로컬 자동 저장 중
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="btnInstallGuide" onclick="openInstallModal()" class="bg-white/15 hover:bg-white/25 active:scale-95 transition text-xs font-medium px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-white/20">
+            <i class="fa-solid fa-mobile-screen-button"></i>
+            <span>앱 설치</span>
+          </button>
+          <button onclick="openBackupModal()" title="데이터 백업/복원" class="w-8 h-8 bg-white/15 hover:bg-white/25 active:scale-95 transition rounded-full flex items-center justify-center border border-white/20">
+            <i class="fa-solid fa-database text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 상단 내비게이션 탭 -->
+      <nav class="grid grid-cols-3 bg-blue-900/30 p-1 rounded-xl backdrop-blur-sm">
+        <button onclick="switchTab('checklist')" id="tab-checklist" class="tab-btn py-2 text-xs font-semibold rounded-lg bg-white text-blue-700 shadow-sm transition-all">
+          <i class="fa-solid fa-list-check mr-1"></i>오늘의 운동
+        </button>
+        <button onclick="switchTab('calendar')" id="tab-calendar" class="tab-btn py-2 text-xs font-semibold rounded-lg text-blue-100 hover:text-white transition-all">
+          <i class="fa-regular fa-calendar-check mr-1"></i>월간 달력
+        </button>
+        <button onclick="switchTab('stats')" id="tab-stats" class="tab-btn py-2 text-xs font-semibold rounded-lg text-blue-100 hover:text-white transition-all">
+          <i class="fa-solid fa-chart-column mr-1"></i>통계 리포트
+        </button>
+      </nav>
+    </header>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <main class="flex-1 px-4 py-5 space-y-5 safe-bottom">
+
+      <!-- ==================== 1. 오늘의 체크리스트 탭 ==================== -->
+      <section id="view-checklist" class="space-y-4">
+
+        <!-- 날짜 선택 컨트롤 -->
+        <div class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-100 flex items-center justify-between">
+          <button onclick="changeDate(-1)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 flex items-center justify-center text-slate-600 transition">
+            <i class="fa-solid fa-chevron-left text-xs"></i>
+          </button>
+          <div class="text-center">
+            <div class="flex items-center justify-center gap-2">
+              <span id="currentDateLabel" class="font-bold text-base text-slate-800">2026년 11월 16일 (월)</span>
+              <span id="todayBadge" class="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">오늘</span>
+            </div>
+            <button onclick="goToday()" id="btnGoToday" class="hidden text-[11px] text-blue-600 font-medium mt-0.5 hover:underline">
+              오늘 날짜로 돌아가기
+            </button>
+          </div>
+          <button onclick="changeDate(1)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 flex items-center justify-center text-slate-600 transition">
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+          </button>
+        </div>
+
+        <!-- 달성률 요약 카드 -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+          <div class="flex items-end justify-between mb-2">
+            <div>
+              <p class="text-xs font-medium text-slate-500">선택일 운동 달성률</p>
+              <div class="flex items-baseline gap-2 mt-0.5">
+                <span id="completionPercent" class="text-2xl font-extrabold text-blue-600">0%</span>
+                <span id="completionCount" class="text-xs font-medium text-slate-500">(0 / 0 완료)</span>
+              </div>
+            </div>
+            <button onclick="copyYesterdayRoutine()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-2.5 py-1.5 rounded-lg transition flex items-center gap-1">
+              <i class="fa-regular fa-copy"></i> 어제 루틴 불러오기
+            </button>
+          </div>
+          <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+            <div id="progressBar" class="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- 새 운동 추가 폼 -->
+        <form onsubmit="addWorkout(event)" class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xs font-bold text-slate-700 uppercase tracking-wider">새 운동 항목 추가</h2>
+            <div class="flex gap-1">
+              <button type="button" onclick="quickFill('달리기', 5, 'km')" class="text-[11px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md font-medium hover:bg-blue-100">+달리기</button>
+              <button type="button" onclick="quickFill('푸시업', 30, '개')" class="text-[11px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md font-medium hover:bg-indigo-100">+푸시업</button>
+              <button type="button" onclick="quickFill('스쿼트', 50, '개')" class="text-[11px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-md font-medium hover:bg-emerald-100">+스쿼트</button>
+            </div>
+          </div>
+          <div class="grid grid-cols-12 gap-2">
+            <input type="text" id="inputName" placeholder="운동명 (예: 달리기, 푸시업)" required
+              class="col-span-6 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition" />
+            <input type="number" id="inputValue" step="any" min="0" placeholder="수치"
+              class="col-span-3 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition" />
+            <select id="inputUnit" class="col-span-3 bg-slate-50 border border-slate-200 rounded-xl px-2 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="개">개</option>
+              <option value="km">km</option>
+              <option value="분">분</option>
+              <option value="세트">세트</option>
+              <option value="kg">kg</option>
+            </select>
+          </div>
+          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-semibold py-2.5 rounded-xl text-sm shadow-sm transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-plus"></i> 체크리스트에 추가
+          </button>
+        </form>
+
+        <!-- 운동 리스트 -->
+        <div class="space-y-2.5" id="workoutList">
+          <!-- JS로 렌더링 -->
+        </div>
+
+      </section>
+
+      <!-- ==================== 2. 월간 달력 탭 ==================== -->
+      <section id="view-calendar" class="hidden space-y-4">
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+          <div class="flex items-center justify-between mb-4">
+            <button onclick="changeCalMonth(-1)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600">
+              <i class="fa-solid fa-chevron-left text-xs"></i>
+            </button>
+            <h2 id="calMonthTitle" class="font-bold text-base text-slate-800">2026년 11월</h2>
+            <button onclick="changeCalMonth(1)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600">
+              <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
+          </div>
+
+          <!-- 요일 헤더 -->
+          <div class="grid grid-cols-7 text-center text-xs font-semibold text-slate-400 mb-2">
+            <div class="text-rose-400">일</div>
+            <div>월</div>
+            <div>화</div>
+            <div>수</div>
+            <div>목</div>
+            <div>금</div>
+            <div class="text-blue-400">토</div>
+          </div>
+
+          <!-- 날짜 그리드 -->
+          <div id="calendarGrid" class="grid grid-cols-7 gap-1.5">
+            <!-- JS로 렌더링 -->
+          </div>
+
+          <!-- 범례 -->
+          <div class="flex items-center justify-end gap-3 mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-500">
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>100% 달성</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block"></span>일부 완료</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-200 inline-block"></span>미완료</span>
+          </div>
+        </div>
+
+        <!-- 선택한 달력 날짜 미리보기 -->
+        <div id="calPreviewCard" class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+          <div class="flex items-center justify-between mb-2">
+            <h3 id="calPreviewDate" class="font-bold text-sm text-slate-800">선택된 날짜 기록</h3>
+            <button onclick="jumpToSelectedDate()" class="text-xs font-semibold text-blue-600 hover:underline">
+              이 날짜 편집하기 <i class="fa-solid fa-arrow-right ml-0.5"></i>
+            </button>
+          </div>
+          <div id="calPreviewList" class="text-xs text-slate-600 space-y-1.5"></div>
+        </div>
+      </section>
+
+      <!-- ==================== 3. 통계 리포트 탭 ==================== -->
+      <section id="view-stats" class="hidden space-y-4">
+        <!-- 월 선택 -->
+        <div class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-100 flex items-center justify-between">
+          <button onclick="changeStatsMonth(-1)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600">
+            <i class="fa-solid fa-chevron-left text-xs"></i>
+          </button>
+          <h2 id="statsMonthTitle" class="font-bold text-base text-slate-800">2026년 11월 통계</h2>
+          <button onclick="changeStatsMonth(1)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600">
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+          </button>
+        </div>
+
+        <!-- 핵심 KPI 3종 -->
+        <div class="grid grid-cols-3 gap-2.5">
+          <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100 text-center">
+            <p class="text-[11px] text-slate-500 font-medium">운동 실천일</p>
+            <p id="statActiveDays" class="text-xl font-extrabold text-blue-600 mt-1">0일</p>
+          </div>
+          <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100 text-center">
+            <p class="text-[11px] text-slate-500 font-medium">완료한 항목</p>
+            <p id="statCompletedItems" class="text-xl font-extrabold text-emerald-600 mt-1">0개</p>
+          </div>
+          <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100 text-center">
+            <p class="text-[11px] text-slate-500 font-medium">평균 달성률</p>
+            <p id="statAvgRate" class="text-xl font-extrabold text-indigo-600 mt-1">0%</p>
+          </div>
+        </div>
+
+        <!-- 일별 달성률 추이 그래프 -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+          <h3 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-1.5">
+            <i class="fa-solid fa-chart-line text-blue-600"></i> 일별 운동 달성률 추이 (%)
+          </h3>
+          <div class="h-48 w-full">
+            <canvas id="dailyChart"></canvas>
+          </div>
+        </div>
+
+        <!-- 종목별 월간 누적 수치 그래프 & 요약 -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+          <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+            <i class="fa-solid fa-trophy text-amber-500"></i> 종목별 월간 누적 기록
+          </h3>
+          <div class="h-48 w-full">
+            <canvas id="exerciseChart"></canvas>
+          </div>
+          <div id="exerciseSummaryList" class="divide-y divide-slate-100 pt-2">
+            <!-- JS로 렌더링 -->
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==================== 스마트폰 홈 화면 추가(PWA) 안내 모달 ==================== -->
+  <div id="installModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-end sm:items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-mobile-screen"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-base text-slate-800">스마트폰 홈 화면에 추가</h3>
+            <p class="text-xs text-slate-500">일반 앱처럼 전체화면으로 바로 실행하세요</p>
+          </div>
+        </div>
+        <button onclick="closeModal('installModal')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- 자동 설치 버튼 (Android Chrome 지원 시 활성화) -->
+      <button id="btnNativeInstall" onclick="triggerNativeInstall()" class="hidden w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl text-sm shadow-md">
+        <i class="fa-solid fa-download mr-1.5"></i> 지금 바로 홈 화면에 설치하기
+      </button>
+
+      <div class="space-y-3 text-xs text-slate-600 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+        <div>
+          <p class="font-bold text-slate-800 mb-1 flex items-center gap-1.5">
+            <i class="fa-brands fa-apple text-base"></i> 아이폰 (Safari)
+          </p>
+          <p class="leading-relaxed">1. 하단 메뉴 중앙의 <strong>공유 버튼 <i class="fa-solid fa-arrow-up-from-bracket text-blue-600"></i></strong>을 누릅니다.<br>2. 스크롤을 내려 <strong>'홈 화면에 추가'</strong>를 선택하고 우측 상단 <strong>'추가'</strong>를 누릅니다.</p>
+        </div>
+        <hr class="border-slate-200" />
+        <div>
+          <p class="font-bold text-slate-800 mb-1 flex items-center gap-1.5">
+            <i class="fa-brands fa-android text-emerald-600 text-base"></i> 갤럭시 / 안드로이드 (Chrome · 삼성 인터넷)
+          </p>
+          <p class="leading-relaxed">1. 우측 상단(또는 하단) <strong>메뉴(⋮ 또는 ≡)</strong>를 누릅니다.<br>2. <strong>'홈 화면에 추가'</strong> 또는 <strong>'앱 설치'</strong>를 누릅니다.</p>
+        </div>
+      </div>
+
+      <p class="text-[11px] text-slate-400 text-center">
+        * 폴더 안의 파일들을 웹(Netlify Drop, GitHub Pages 등)에 올린 뒤 접속하면 스마트폰에서 바로 앱으로 설치됩니다.
+      </p>
+    </div>
+  </div>
+
+  <!-- ==================== 데이터 백업 / 복원 모달 ==================== -->
+  <div id="backupModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-end sm:items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-base text-slate-800">로컬 데이터 관리 (백업/복원)</h3>
+        <button onclick="closeModal('backupModal')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-500 leading-relaxed">
+        모든 운동 기록은 현재 기기의 브라우저 저장소(localStorage)에 자동 저장됩니다. 기기 변경이나 브라우저 초기화에 대비해 JSON 파일로 백업할 수 있습니다.
+      </p>
+      <div class="grid grid-cols-2 gap-2.5">
+        <button onclick="exportData()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-file-export"></i> 기록 내보내기 (JSON)
+        </button>
+        <label class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-file-import"></i> 기록 불러오기
+          <input type="file" accept=".json" onchange="importData(event)" class="hidden" />
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== Service Worker 등록 ====================
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+
+    // ==================== 상태 및 로컬 스토리지 관리 ====================
+    const STORAGE_KEY = 'workout_pwa_records_v1';
+    let records = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+    function getTodayStr() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    let selectedDate = getTodayStr();
+    let calViewDate = new Date();
+    let statsViewDate = new Date();
+    let dailyChartInstance = null;
+    let exerciseChartInstance = null;
+    let deferredPrompt = null;
+
+    if (Object.keys(records).length === 0) {
+      records[selectedDate] = [
+        { id: Date.now() + 1, name: '달리기', value: 3, unit: 'km', completed: false },
+        { id: Date.now() + 2, name: '푸시업', value: 30, unit: '개', completed: false },
+        { id: Date.now() + 3, name: '플랭크', value: 3, unit: '분', completed: false }
+      ];
+      saveRecords();
+    }
+
+    function saveRecords() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    }
+
+    function formatDateKorean(dateStr) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const dateObj = new Date(y, m - 1, d);
+      const days = ['일', '월', '화', '수', '목', '금', '토'];
+      return `${y}년 ${m}월 ${d}일 (${days[dateObj.getDay()]})`;
+    }
+
+    // ==================== 탭 전환 ====================
+    function switchTab(tabName) {
+      ['checklist', 'calendar', 'stats'].forEach(t => {
+        document.getElementById(`view-${t}`).classList.add('hidden');
+        const btn = document.getElementById(`tab-${t}`);
+        btn.classList.remove('bg-white', 'text-blue-700', 'shadow-sm');
+        btn.classList.add('text-blue-100');
+      });
+
+      document.getElementById(`view-${tabName}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-${tabName}`);
+      activeBtn.classList.add('bg-white', 'text-blue-700', 'shadow-sm');
+      activeBtn.classList.remove('text-blue-100');
+
+      if (tabName === 'checklist') renderChecklist();
+      if (tabName === 'calendar') renderCalendar();
+      if (tabName === 'stats') renderStats();
+    }
+
+    // ==================== 1. 체크리스트 기능 ====================
+    function changeDate(offset) {
+      const [y, m, d] = selectedDate.split('-').map(Number);
+      const dt = new Date(y, m - 1, d + offset);
+      selectedDate = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+      renderChecklist();
+    }
+
+    function goToday() {
+      selectedDate = getTodayStr();
+      renderChecklist();
+    }
+
+    function quickFill(name, val, unit) {
+      document.getElementById('inputName').value = name;
+      document.getElementById('inputValue').value = val;
+      document.getElementById('inputUnit').value = unit;
+      document.getElementById('inputName').focus();
+    }
+
+    function addWorkout(e) {
+      e.preventDefault();
+      const nameInput = document.getElementById('inputName');
+      const valInput = document.getElementById('inputValue');
+      const unitInput = document.getElementById('inputUnit');
+
+      const name = nameInput.value.trim();
+      if (!name) return;
+
+      const value = valInput.value !== '' ? parseFloat(valInput.value) : 0;
+      const unit = unitInput.value;
+
+      if (!records[selectedDate]) records[selectedDate] = [];
+      records[selectedDate].push({
+        id: Date.now(),
+        name,
+        value,
+        unit,
+        completed: false
+      });
+
+      saveRecords();
+      nameInput.value = '';
+      valInput.value = '';
+      renderChecklist();
+    }
+
+    function toggleWorkout(id) {
+      const list = records[selectedDate] || [];
+      const item = list.find(w => w.id === id);
+      if (item) {
+        item.completed = !item.completed;
+        saveRecords();
+        renderChecklist();
+      }
+    }
+
+    function updateWorkoutValue(id, newVal) {
+      const list = records[selectedDate] || [];
+      const item = list.find(w => w.id === id);
+      if (item) {
+        item.value = parseFloat(newVal) || 0;
+        saveRecords();
+      }
+    }
+
+    function deleteWorkout(id) {
+      if (!records[selectedDate]) return;
+      records[selectedDate] = records[selectedDate].filter(w => w.id !== id);
+      if (records[selectedDate].length === 0) delete records[selectedDate];
+      saveRecords();
+      renderChecklist();
+    }
+
+    function copyYesterdayRoutine() {
+      const [y, m, d] = selectedDate.split('-').map(Number);
+      const prev = new Date(y, m - 1, d - 1);
+      const prevStr = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}-${String(prev.getDate()).padStart(2, '0')}`;
+      const prevList = records[prevStr];
+
+      if (!prevList || prevList.length === 0) {
+        alert('어제 등록된 운동 기록이 없습니다.');
+        return;
+      }
+
+      if (!records[selectedDate]) records[selectedDate] = [];
+      prevList.forEach((item, idx) => {
+        records[selectedDate].push({
+          id: Date.now() + idx,
+          name: item.name,
+          value: item.value,
+          unit: item.unit,
+          completed: false
+        });
+      });
+      saveRecords();
+      renderChecklist();
+    }
+
+    function renderChecklist() {
+      const todayStr = getTodayStr();
+      document.getElementById('currentDateLabel').textContent = formatDateKorean(selectedDate);
+      document.getElementById('todayBadge').classList.toggle('hidden', selectedDate !== todayStr);
+      document.getElementById('btnGoToday').classList.toggle('hidden', selectedDate === todayStr);
+
+      const list = records[selectedDate] || [];
+      const total = list.length;
+      const done = list.filter(i => i.completed).length;
+      const percent = total === 0 ? 0 : Math.round((done / total) * 100);
+
+      document.getElementById('completionPercent').textContent = `${percent}%`;
+      document.getElementById('completionCount').textContent = `(${done} / ${total} 완료)`;
+      document.getElementById('progressBar').style.width = `${percent}%`;
+
+      const container = document.getElementById('workoutList');
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl p-8 text-center border border-dashed border-slate-200">
+            <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-2.5">
+              <i class="fa-solid fa-person-running text-xl"></i>
+            </div>
+            <p class="text-sm font-semibold text-slate-600">등록된 운동이 없습니다</p>
+            <p class="text-xs text-slate-400 mt-1">위 입력창에서 오늘 할 운동을 추가해보세요!</p>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = list.map(item => `
+        <div class="bg-white rounded-2xl p-3.5 shadow-sm border ${item.completed ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-100'} flex items-center justify-between gap-3 transition-all">
+          <button onclick="toggleWorkout(${item.id})" class="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition check-pop ${item.completed ? 'bg-emerald-500 text-white shadow-xs' : 'border-2 border-slate-300 bg-white text-transparent hover:border-blue-500'}">
+            <i class="fa-solid fa-check text-xs"></i>
+          </button>
+
+          <div class="flex-1 min-w-0">
+            <p class="font-bold text-sm truncate ${item.completed ? 'line-through text-slate-400' : 'text-slate-800'}">${escapeHtml(item.name)}</p>
+            <div class="flex items-center gap-1.5 mt-1">
+              <input type="number" step="any" value="${item.value}" onchange="updateWorkoutValue(${item.id}, this.value)"
+                class="w-16 bg-slate-100 border border-slate-200 rounded-lg px-2 py-0.5 text-xs font-semibold text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <span class="text-xs font-medium text-slate-500">${escapeHtml(item.unit)}</span>
+            </div>
+          </div>
+
+          <button onclick="deleteWorkout(${item.id})" class="w-8 h-8 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center transition shrink-0">
+            <i class="fa-regular fa-trash-can text-sm"></i>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    // ==================== 2. 월간 달력 기능 ====================
+    function changeCalMonth(offset) {
+      calViewDate = new Date(calViewDate.getFullYear(), calViewDate.getMonth() + offset, 1);
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      const year = calViewDate.getFullYear();
+      const month = calViewDate.getMonth();
+      document.getElementById('calMonthTitle').textContent = `${year}년 ${month + 1}월`;
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const lastDate = new Date(year, month + 1, 0).getDate();
+      const todayStr = getTodayStr();
+
+      let html = '';
+      for (let i = 0; i < firstDay; i++) {
+        html += `<div class="h-12"></div>`;
+      }
+
+      for (let d = 1; d <= lastDate; d++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const list = records[dateStr] || [];
+        const isSelected = dateStr === selectedDate;
+        const isToday = dateStr === todayStr;
+
+        let statusDot = '';
+        if (list.length > 0) {
+          const done = list.filter(i => i.completed).length;
+          if (done === list.length) {
+            statusDot = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span>`;
+          } else if (done > 0) {
+            statusDot = `<span class="w-2 h-2 rounded-full bg-blue-500"></span>`;
+          } else {
+            statusDot = `<span class="w-2 h-2 rounded-full bg-slate-300"></span>`;
+          }
+        }
+
+        html += `
+          <button onclick="selectCalendarDate('${dateStr}')" class="h-12 rounded-xl flex flex-col items-center justify-center gap-1 text-xs font-semibold transition relative
+            ${isSelected ? 'bg-blue-600 text-white shadow-sm' : isToday ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'hover:bg-slate-100 text-slate-700'}">
+            <span>${d}</span>
+            <div class="h-2 flex items-center justify-center">${statusDot}</div>
+          </button>`;
+      }
+
+      document.getElementById('calendarGrid').innerHTML = html;
+      renderCalPreview();
+    }
+
+    function selectCalendarDate(dateStr) {
+      selectedDate = dateStr;
+      renderCalendar();
+    }
+
+    function renderCalPreview() {
+      document.getElementById('calPreviewDate').textContent = formatDateKorean(selectedDate);
+      const list = records[selectedDate] || [];
+      const container = document.getElementById('calPreviewList');
+
+      if (list.length === 0) {
+        container.innerHTML = `<p class="text-slate-400 py-2">기록된 운동 내역이 없습니다.</p>`;
+        return;
+      }
+
+      container.innerHTML = list.map(item => `
+        <div class="flex items-center justify-between py-1 border-b border-slate-50 last:border-0">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid ${item.completed ? 'fa-circle-check text-emerald-500' : 'fa-circle text-slate-300'}"></i>
+            <span class="${item.completed ? 'text-slate-700 font-medium' : 'text-slate-400'}">${escapeHtml(item.name)}</span>
+          </span>
+          <span class="font-semibold text-slate-700">${item.value}${escapeHtml(item.unit)}</span>
+        </div>
+      `).join('');
+    }
+
+    function jumpToSelectedDate() {
+      switchTab('checklist');
+    }
+
+    // ==================== 3. 월간 통계 & 차트 기능 ====================
+    function changeStatsMonth(offset) {
+      statsViewDate = new Date(statsViewDate.getFullYear(), statsViewDate.getMonth() + offset, 1);
+      renderStats();
+    }
+
+    function renderStats() {
+      const year = statsViewDate.getFullYear();
+      const month = statsViewDate.getMonth();
+      const prefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+      document.getElementById('statsMonthTitle').textContent = `${year}년 ${month + 1}월 통계`;
+
+      const lastDate = new Date(year, month + 1, 0).getDate();
+      const labels = [];
+      const dailyRates = [];
+      let activeDays = 0;
+      let totalCompletedItems = 0;
+      let sumRates = 0;
+      let recordedDaysCount = 0;
+
+      const exerciseTotals = {};
+
+      for (let d = 1; d <= lastDate; d++) {
+        const dateStr = `${prefix}-${String(d).padStart(2, '0')}`;
+        labels.push(`${d}일`);
+        const list = records[dateStr] || [];
+
+        if (list.length > 0) {
+          const doneList = list.filter(i => i.completed);
+          const rate = Math.round((doneList.length / list.length) * 100);
+          dailyRates.push(rate);
+          sumRates += rate;
+          recordedDaysCount++;
+
+          if (doneList.length > 0) activeDays++;
+          totalCompletedItems += doneList.length;
+
+          doneList.forEach(item => {
+            const key = `${item.name} (${item.unit})`;
+            if (!exerciseTotals[key]) {
+              exerciseTotals[key] = { name: item.name, unit: item.unit, total: 0, count: 0 };
+            }
+            exerciseTotals[key].total += Number(item.value) || 0;
+            exerciseTotals[key].count += 1;
+          });
+        } else {
+          dailyRates.push(0);
+        }
+      }
+
+      document.getElementById('statActiveDays').textContent = `${activeDays}일`;
+      document.getElementById('statCompletedItems').textContent = `${totalCompletedItems}개`;
+      document.getElementById('statAvgRate').textContent = `${recordedDaysCount ? Math.round(sumRates / recordedDaysCount) : 0}%`;
+
+      const ctx1 = document.getElementById('dailyChart').getContext('2d');
+      if (dailyChartInstance) dailyChartInstance.destroy();
+      dailyChartInstance = new Chart(ctx1, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: '달성률 (%)',
+            data: dailyRates,
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37, 99, 235, 0.12)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.35,
+            pointRadius: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, max: 100, ticks: { font: { size: 10 } } },
+            x: { ticks: { maxTicksLimit: 10, font: { size: 10 } }, grid: { display: false } }
+          }
+        }
+      });
+
+      const sortedExercises = Object.values(exerciseTotals).sort((a, b) => b.total - a.total);
+      const ctx2 = document.getElementById('exerciseChart').getContext('2d');
+      if (exerciseChartInstance) exerciseChartInstance.destroy();
+      exerciseChartInstance = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: sortedExercises.length ? sortedExercises.map(e => `${e.name}(${e.unit})`) : ['데이터 없음'],
+          datasets: [{
+            label: '월간 누적량',
+            data: sortedExercises.length ? sortedExercises.map(e => Number(e.total.toFixed(2))) : [0],
+            backgroundColor: ['#3b82f6', '#10b981', '#6366f1', '#f59e0b', '#ec4899'],
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { font: { size: 10 } } },
+            x: { ticks: { font: { size: 11 } }, grid: { display: false } }
+          }
+        }
+      });
+
+      const summaryContainer = document.getElementById('exerciseSummaryList');
+      if (sortedExercises.length === 0) {
+        summaryContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-3">이번 달에 완료된 운동 기록이 아직 없습니다.</p>`;
+      } else {
+        summaryContainer.innerHTML = sortedExercises.map(e => `
+          <div class="py-2.5 flex items-center justify-between text-xs">
+            <div>
+              <span class="font-bold text-slate-800">${escapeHtml(e.name)}</span>
+              <span class="text-slate-400 ml-1">(${e.count}회 완료)</span>
+            </div>
+            <span class="font-extrabold text-blue-600 text-sm">${Number(e.total.toFixed(2))} ${escapeHtml(e.unit)}</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    // ==================== 모달, 백업/복원 & PWA 설치 ====================
+    function openInstallModal() {
+      document.getElementById('installModal').classList.remove('hidden');
+    }
+    function openBackupModal() {
+      document.getElementById('backupModal').classList.remove('hidden');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('btnNativeInstall').classList.remove('hidden');
+    });
+
+    async function triggerNativeInstall() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      document.getElementById('btnNativeInstall').classList.add('hidden');
+      closeModal('installModal');
+    }
+
+    function exportData() {
+      const blob = new Blob([JSON.stringify(records, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `workout-backup-${getTodayStr()}.json`;
+      a.click();
+    }
+
+    function importData(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const imported = JSON.parse(ev.target.result);
+          if (typeof imported === 'object' && imported !== null) {
+            records = { ...records, ...imported };
+            saveRecords();
+            renderChecklist();
+            closeModal('backupModal');
+            alert('운동 기록이 성공적으로 복원되었습니다!');
+          }
+        } catch (err) {
+          alert('올바른 JSON 백업 파일이 아닙니다.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    renderChecklist();
+  </script>
+</body>
+</html>
