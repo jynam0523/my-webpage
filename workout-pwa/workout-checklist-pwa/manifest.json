@@ -1,0 +1,19 @@
+{
+  "name": "운동 체크리스트 & 기록 관리",
+  "short_name": "운동체크",
+  "description": "날짜별 운동 체크리스트와 수치를 로컬에 저장하고 월간 통계를 확인하는 앱",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
