@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>우리 반 스마트 장보기 미션</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+:root{--bg:#eaf6ef;--card:#fff;--ink:#1f2a44;--sub:#5b6785;--main:#1f9d63;--main-d:#157348;--sun:#ffc93c;--warn:#e0483c;--line:#cfe3d8;--soft:#f3faf6;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#13211b;--card:#1c2e26;--ink:#eaf3ee;--sub:#9db5a8;--main:#3fc488;--main-d:#2aa06c;--line:#2f4a3e;--soft:#22372d;--warn:#ff6b5e}}
+:root[data-theme="dark"]{--bg:#13211b;--card:#1c2e26;--ink:#eaf3ee;--sub:#9db5a8;--main:#3fc488;--main-d:#2aa06c;--line:#2f4a3e;--soft:#22372d;--warn:#ff6b5e}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans KR",system-ui,sans-serif;line-height:1.55}
+main{max-width:960px;margin:0 auto;padding:20px 16px 60px}
+h1,h2,h3{font-family:"Jua","Noto Sans KR",sans-serif;font-weight:400;margin:0}
+h1{font-size:clamp(28px,6vw,42px)}
+.sub{color:var(--sub);margin:6px 0 20px}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px}
+button:focus-visible,textarea:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.missions{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.mission{background:var(--card);border:2px solid var(--line);padding:22px 18px;text-align:left;color:var(--ink);border-radius:18px;transition:transform .15s,border-color .15s}
+.mission:hover{transform:translateY(-3px);border-color:var(--main)}
+.mission .em{font-size:48px;display:block}
+.mission h3{font-size:24px;margin:8px 0 4px}
+.price-tag{display:inline-block;background:var(--sun);color:#3a2a00;font-weight:700;padding:3px 12px;border-radius:99px}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:16px}
+.bar .row{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;justify-content:space-between}
+.bar b{font-size:20px}
+.meter{height:12px;background:var(--soft);border-radius:99px;overflow:hidden;margin-top:8px;border:1px solid var(--line)}
+.meter i{display:block;height:100%;background:var(--main);transition:width .25s,background .25s}
+.over .meter i{background:var(--warn)}
+.cart{display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;min-height:58px;align-items:center}
+.cart .empty{color:var(--sub);font-size:14px}
+.chip{flex:none;display:flex;align-items:center;gap:8px;background:var(--soft);border:2px solid var(--main);border-radius:14px;padding:6px 8px 6px 10px}
+.chip .st{font-size:22px;letter-spacing:-4px;white-space:nowrap}
+.chip .ct{font-size:13px;font-weight:700;line-height:1.3}
+.chip .ct small{display:block;color:var(--sub);font-weight:400}
+.chip button{width:24px;height:24px;background:var(--line);color:var(--ink);font-size:12px;border-radius:50%;padding:0}
+.chip.pop{animation:pop .3s ease-out}
+@keyframes pop{0%{transform:scale(.7)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+.warn{color:var(--warn);font-weight:700;margin:8px 0 0;display:none}
+.over .warn{display:block}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.item{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:14px 10px;text-align:center}
+.item.on{border-color:var(--main);background:var(--soft)}
+.item .em{font-size:44px;line-height:1.1}
+.item .nm{font-weight:700;margin-top:4px}
+.item .pr{color:var(--sub);font-size:14px}
+.qty{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0 4px}
+.qty button{width:36px;height:36px;background:var(--main);color:#fff;font-size:20px;font-weight:700}
+.qty button:disabled{opacity:.35;cursor:default}
+.qty span{min-width:24px;font-weight:700;font-size:18px}
+.cancel{background:none;color:var(--sub);font-size:13px;text-decoration:underline;padding:2px 6px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;justify-content:space-between}
+.btn{padding:13px 24px;font-weight:700;font-size:17px;background:var(--main);color:#fff}
+.btn:hover:not(:disabled){background:var(--main-d)}
+.btn:disabled{background:var(--line);color:var(--sub);cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.receipt{background:var(--card);border:2px dashed var(--line);border-radius:16px;padding:22px}
+.receipt h2{font-size:26px;margin-bottom:4px}
+table{width:100%;border-collapse:collapse;margin:14px 0}
+th,td{padding:8px 4px;border-bottom:1px solid var(--line);text-align:left}
+th:last-child,td:last-child,th:nth-child(2),td:nth-child(2){text-align:right}
+.sum{display:flex;justify-content:space-between;padding:4px 0}
+.sum.big{font-size:20px;font-weight:700}
+label{display:block;font-weight:700;margin:20px 0 6px}
+textarea{width:100%;min-height:120px;padding:12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;resize:vertical}
+.toast{min-height:24px;color:var(--main);font-weight:700;margin-top:10px}
+.hide{display:none!important}
+@media print{body{background:#fff;color:#000}.noprint{display:none!important}.receipt{border:1px solid #000}textarea{border:1px solid #000;color:#000;background:#fff}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main>
+<section id="s1">
+  <h1>우리 반 스마트 장보기 미션</h1>
+  <p class="sub">미션을 고르고, 정해진 예산 안에서 똑똑하게 장을 봐요.</p>
+  <div class="missions" id="missions"></div>
+</section>
+
+<section id="s2" class="hide">
+  <h2 id="mTitle"></h2>
+  <p class="sub">+, - 버튼으로 수량을 정해요. 예산을 넘기면 제출할 수 없어요.</p>
+  <div class="bar" id="bar">
+    <div class="row"><span>예산 <b id="bBudget"></b></span><span>사용 <b id="bSpent"></b></span><span>잔액 <b id="bLeft"></b></span><span>총 <b id="bCount"></b></span></div>
+    <div class="meter"><i id="bFill"></i></div>
+    <div class="cart" id="cart" aria-live="polite" aria-label="내 장바구니"></div>
+    <p class="warn" role="alert">예산을 넘었어요! 수량을 줄여 주세요.</p>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="actions">
+    <button class="btn ghost" id="back">미션 다시 고르기</button>
+    <button class="btn" id="submit" disabled>제출하기</button>
+  </div>
+</section>
+
+<section id="s3" class="hide">
+  <div class="receipt" id="receipt">
+    <h2>구매 영수증</h2>
+    <div class="sub" id="rMission"></div>
+    <table><thead><tr><th>품목</th><th>수량</th><th>금액</th></tr></thead><tbody id="rBody"></tbody></table>
+    <div class="sum"><span>예산</span><span id="rBudget"></span></div>
+    <div class="sum"><span>사용 금액</span><span id="rSpent"></span></div>
+    <div class="sum big"><span>남은 잔액</span><span id="rLeft"></span></div>
+    <label for="reason">이 물건들을 선택한 이유를 작성해 주세요</label>
+    <textarea id="reason" placeholder="예: 카레에 꼭 필요한 재료를 먼저 샀고, 남은 돈으로 간식을 하나 골랐어요."></textarea>
+  </div>
+  <div class="actions noprint">
+    <button class="btn ghost" id="edit">장바구니 고치기</button>
+    <span style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn ghost" id="copy">결과 복사하기</button>
+      <button class="btn" id="print">PDF로 저장하기</button>
+    </span>
+  </div>
+  <div class="toast noprint" id="toast" role="status"></div>
+  <div class="actions noprint"><button class="btn ghost" id="restart">처음부터 다시 하기</button></div>
+</section>
+</main>
+<script>
+const M=[
+{id:"curry",em:"🍛",name:"카레 만들기",budget:15000,items:[["🥔","감자",2000],["🥕","당근",1500],["🧅","양파",1800],["🍛","카레 가루",3500],["🍗","닭고기",5000],["🍚","쌀",4500],["🍫","초콜릿",2500],["🥤","탄산음료",2000]]},
+{id:"camp",em:"🏕️",name:"여름캠핑 준비하기",budget:30000,items:[["🔦","손전등",6000],["🧴","모기 기피제",5000],["🍖","고기",12000],["🧊","얼음팩",3000],["💧","생수",1500],["🍡","마시멜로",3500],["🪵","장작",8000],["🎮","휴대용 게임기",15000]]},
+{id:"party",em:"🎂",name:"친구 생일파티 준비하기",budget:40000,items:[["🎂","케이크",12000],["🎈","풍선",3000],["🎁","선물",10000],["🕯️","초",1500],["🥳","고깔모자",2000],["🍕","피자",15000],["🧃","주스",2500],["🎊","폭죽",4000]]}
+];
+const $=id=>document.getElementById(id),won=n=>n.toLocaleString("ko-KR")+"원";
+let cur=null,q=[],prev=[];
+const spent=()=>cur.items.reduce((s,it,i)=>s+it[2]*q[i],0);
+const count=()=>q.reduce((a,b)=>a+b,0);
+const show=n=>{["s1","s2","s3"].forEach(s=>$(s).classList.toggle("hide",s!=="s"+n));window.scrollTo(0,0)};
+
+$("missions").innerHTML=M.map(m=>`<button class="mission" data-id="${m.id}"><span class="em">${m.em}</span><h3>${m.name}</h3><span class="price-tag">예산 ${won(m.budget)}</span></button>`).join("");
+$("missions").onclick=e=>{const b=e.target.closest(".mission");if(!b)return;cur=M.find(m=>m.id===b.dataset.id);q=cur.items.map(()=>0);prev=q.slice();$("mTitle").textContent=cur.em+" "+cur.name;draw();show(2)};
+
+function draw(){
+  $("grid").innerHTML=cur.items.map((it,i)=>`<div class="item ${q[i]?"on":""}"><div class="em">${it[0]}</div><div class="nm">${it[1]}</div><div class="pr">${won(it[2])}</div><div class="qty"><button data-a="-" data-i="${i}" aria-label="${it[1]} 빼기" ${q[i]?"":"disabled"}>−</button><span>${q[i]}</span><button data-a="+" data-i="${i}" aria-label="${it[1]} 담기">+</button></div>${q[i]?`<button class="cancel" data-a="x" data-i="${i}">담기 취소</button>`:""}</div>`).join("");
+  const s=spent(),left=cur.budget-s,over=left<0;
+  $("bar").classList.toggle("over",over);
+  $("bBudget").textContent=won(cur.budget);$("bSpent").textContent=won(s);
+  $("bLeft").textContent=(over?"−":"")+won(Math.abs(left));$("bCount").textContent=count()+"개";
+  $("bFill").style.width=Math.min(100,s/cur.budget*100)+"%";
+  $("submit").disabled=over||count()===0;
+  const chips=cur.items.map((it,i)=>q[i]?`<span class="chip ${q[i]!==prev[i]?"pop":""}"><span class="st" aria-hidden="true">${it[0].repeat(Math.min(q[i],5))}</span><span class="ct">${it[1]} ×${q[i]}<small>${won(it[2]*q[i])}</small></span><button data-i="${i}" aria-label="${it[1]} 장바구니에서 빼기">✕</button></span>`:"").join("");
+  $("cart").innerHTML="<span aria-hidden='true' style='font-size:26px'>🛒</span>"+(chips||"<span class='empty'>아직 담은 물건이 없어요. 아래에서 + 를 눌러 보세요.</span>");
+  prev=q.slice();
+}
+$("grid").onclick=e=>{const b=e.target.closest("button");if(!b||b.disabled)return;const i=+b.dataset.i,a=b.dataset.a;
+  if(a==="+")q[i]++;else if(a==="-")q[i]=Math.max(0,q[i]-1);else q[i]=0;draw()};
+$("cart").onclick=e=>{const b=e.target.closest("button");if(!b)return;q[+b.dataset.i]=0;draw()};
+$("back").onclick=()=>show(1);
+$("submit").onclick=()=>{
+  $("rMission").textContent=cur.em+" "+cur.name;
+  $("rBody").innerHTML=cur.items.map((it,i)=>q[i]?`<tr><td>${it[0]} ${it[1]}</td><td>${q[i]}개</td><td>${won(it[2]*q[i])}</td></tr>`:"").join("");
+  $("rBudget").textContent=won(cur.budget);$("rSpent").textContent=won(spent());$("rLeft").textContent=won(cur.budget-spent());
+  $("toast").textContent="";show(3)};
+$("edit").onclick=()=>show(2);
+$("print").onclick=()=>{$("reason").textContent=$("reason").value;window.print()};
+function text(){
+  const L=["[우리 반 스마트 장보기] "+cur.name,"예산: "+won(cur.budget),""];
+  cur.items.forEach((it,i)=>{if(q[i])L.push(it[1]+" "+q[i]+"개 = "+won(it[2]*q[i]))});
+  L.push("","사용 금액: "+won(spent()),"남은 잔액: "+won(cur.budget-spent()),"","선택한 이유:",$("reason").value||"(아직 작성하지 않았어요)");
+  return L.join("\n")}
+$("copy").onclick=async()=>{
+  try{await navigator.clipboard.writeText(text());$("toast").textContent="복사했어요! 원하는 곳에 붙여 넣으세요."}
+  catch(err){const t=$("reason");$("toast").textContent="복사하지 못했어요. 영수증 화면을 캡처해 주세요."}};
+$("restart").onclick=()=>{$("reason").value="";show(1)};
+</script>
+</body>
+</html>
