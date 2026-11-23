@@ -137,9 +137,7 @@
       color: #555b72;
     }
 
-    /* ==========================================================================
-       프로젝트 섹션 개선 (카테고리 탭, 검색, 깔끔한 반응형 카드 그리드)
-       ========================================================================== */
+    /* ================= 프로젝트 섹션 ================= */
     .project-header-bar {
       display: flex;
       flex-direction: column;
@@ -220,7 +218,7 @@
       background: rgba(255, 255, 255, 0.25);
     }
 
-    /* 프로젝트 카드 그리드 (반응형 3열 / 모바일 1열) */
+    /* 프로젝트 카드 그리드 */
     .project-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -274,6 +272,7 @@
     .badge-ai { background: #f3e5f5; color: #7b1fa2; }       /* AI 보라 */
     .badge-sheet { background: #e0f2f1; color: #00695c; }    /* 구글 시트/학급 연동 청록 */
     .badge-health { background: #fff3e0; color: #d84315; }   /* 건강/운동 오렌지 */
+    .badge-art { background: #fce4ec; color: #c2185b; }      /* 예술/감상 로즈핑크 */
 
     .project-card h3 {
       font-size: 1.05rem;
@@ -411,7 +410,7 @@
       </div>
     </section>
 
-    <!-- 4. 프로젝트 (한눈에 잘 보이도록 개선된 섹션) -->
+    <!-- 4. 프로젝트 -->
     <section class="content-section" id="projects">
       <h2>프로젝트</h2>
 
@@ -420,22 +419,22 @@
         <!-- 실시간 검색창 -->
         <div class="search-box">
           <span class="search-icon">🔍</span>
-          <input type="text" id="projectSearch" placeholder="프로젝트 이름이나 키워드로 검색해보세요... (예: KDC, 생일, 퀴즈, 구글시트)" aria-label="프로젝트 검색">
+          <input type="text" id="projectSearch" placeholder="프로젝트 이름이나 키워드로 검색해보세요... (예: KDC, 상점, 게시판, 구글시트)" aria-label="프로젝트 검색">
         </div>
 
-        <!-- 카테고리 탭 버튼 (개수 자동 집계) -->
+        <!-- 카테고리 탭 버튼 -->
         <div class="category-tabs" role="tablist">
           <button class="tab-btn active" data-category="all" role="tab" aria-selected="true">
-            전체 보기 <span class="tab-count">18</span>
+            전체 보기 <span class="tab-count">24</span>
           </button>
           <button class="tab-btn" data-category="edu" role="tab" aria-selected="false">
-            📚 교과·학습 교구 <span class="tab-count">8</span>
+            📚 교과·학습 교구 <span class="tab-count">9</span>
           </button>
           <button class="tab-btn" data-category="tool" role="tab" aria-selected="false">
-            💡 생활 & 학급 도구 <span class="tab-count">7</span>
+            💡 생활 & 학급 도구 <span class="tab-count">11</span>
           </button>
           <button class="tab-btn" data-category="ai" role="tab" aria-selected="false">
-            🤖 AI & 스마트 분석 <span class="tab-count">3</span>
+            🤖 AI & 스마트 분석 <span class="tab-count">4</span>
           </button>
         </div>
       </div>
@@ -444,7 +443,7 @@
       <div class="project-grid" id="projectGrid">
 
         <!-- 1. 오늘의 할 일 관리 -->
-        <article class="project-card" data-category="tool" data-keywords="할일 투두 일정 관리 생산성 생활">
+        <article class="project-card" data-category="tool" data-keywords="할일 투두 일정 관리 생산성 생활 체크리스트">
           <div class="card-top">
             <span class="card-icon">📋</span>
             <span class="badge badge-tool">생활·도구</span>
@@ -457,7 +456,7 @@
         </article>
 
         <!-- 2. 나만의 도장 만들기 -->
-        <article class="project-card" data-category="tool" data-keywords="도장 만들기 스탬프 인장 그래픽 디자인">
+        <article class="project-card" data-category="tool" data-keywords="도장 만들기 스탬프 인장 그래픽 디자인 폰트 커스텀">
           <div class="card-top">
             <span class="card-icon">🏷️</span>
             <span class="badge badge-tool">디자인·도구</span>
@@ -470,7 +469,7 @@
         </article>
 
         <!-- 3. 기분에 따른 명언 추천 -->
-        <article class="project-card" data-category="tool" data-keywords="명언 추천 감정 기분 힐링 글귀">
+        <article class="project-card" data-category="tool" data-keywords="명언 추천 감정 기분 힐링 글귀 위로">
           <div class="card-top">
             <span class="card-icon">💭</span>
             <span class="badge badge-tool">감성·생활</span>
@@ -483,7 +482,7 @@
         </article>
 
         <!-- 4. KDC 주류 카드 짝 맞추기 -->
-        <article class="project-card" data-category="edu" data-keywords="kdc 한국십진분류 도서관 문헌정보 카드 뒤집기 게임 사서">
+        <article class="project-card" data-category="edu" data-keywords="kdc 한국십진분류 도서관 문헌정보 카드 뒤집기 게임 사서 분류기호">
           <div class="card-top">
             <span class="card-icon">📚</span>
             <span class="badge badge-edu">문헌정보·교구</span>
@@ -496,7 +495,7 @@
         </article>
 
         <!-- 5. 독도 객관식 퀴즈 앱 -->
-        <article class="project-card" data-category="edu" data-keywords="독도 퀴즈 사회 역사 객관식 사지선다 문제">
+        <article class="project-card" data-category="edu" data-keywords="독도 퀴즈 사회 역사 객관식 사지선다 문제 지리 생태">
           <div class="card-top">
             <span class="card-icon">🇰🇷</span>
             <span class="badge badge-edu">사회·역사</span>
@@ -509,7 +508,7 @@
         </article>
 
         <!-- 6. 도형 학습 도구 -->
-        <article class="project-card" data-category="edu" data-keywords="도형 회전 뒤집기 대칭 수학 공간지각 교구">
+        <article class="project-card" data-category="edu" data-keywords="도형 회전 뒤집기 대칭 수학 공간지각 교구 평면도형">
           <div class="card-top">
             <span class="card-icon">📐</span>
             <span class="badge badge-edu">수학·교구</span>
@@ -522,7 +521,7 @@
         </article>
 
         <!-- 7. 인터랙티브 역사 연표 -->
-        <article class="project-card" data-category="edu" data-keywords="조선 역사 연표 타임라인 사건 연도">
+        <article class="project-card" data-category="edu" data-keywords="조선 역사 연표 타임라인 사건 연도 타임라인 탐색">
           <div class="card-top">
             <span class="card-icon">📜</span>
             <span class="badge badge-edu">역사·교구</span>
@@ -535,7 +534,7 @@
         </article>
 
         <!-- 8. 디지털 리터러시 자기평가 레이더 차트 -->
-        <article class="project-card" data-category="ai" data-keywords="디지털 리터러시 역량 차트 레이더 평가 다각형 시각화">
+        <article class="project-card" data-category="ai" data-keywords="디지털 리터러시 역량 차트 레이더 평가 다각형 시각화 분석">
           <div class="card-top">
             <span class="card-icon">📊</span>
             <span class="badge badge-ai">정보·평가</span>
@@ -548,7 +547,7 @@
         </article>
 
         <!-- 9. 3D 주사위 시뮬레이터와 결과 집계 차트 -->
-        <article class="project-card" data-category="edu" data-keywords="3d 주사위 시뮬레이션 확률 통계 수학 차트 집계">
+        <article class="project-card" data-category="edu" data-keywords="3d 주사위 시뮬레이션 확률 통계 수학 차트 집계 그래프">
           <div class="card-top">
             <span class="card-icon">🎲</span>
             <span class="badge badge-edu">수학·통계</span>
@@ -561,7 +560,7 @@
         </article>
 
         <!-- 10. 속담 이어 말하기 게임 -->
-        <article class="project-card" data-category="edu" data-keywords="속담 국어 어휘 퀴즈 게임 이어말하기 언어">
+        <article class="project-card" data-category="edu" data-keywords="속담 국어 어휘 퀴즈 게임 이어말하기 언어 표현력">
           <div class="card-top">
             <span class="card-icon">💬</span>
             <span class="badge badge-edu">국어·어휘</span>
@@ -574,7 +573,7 @@
         </article>
 
         <!-- 11. 수학 대모험 -->
-        <article class="project-card" data-category="edu" data-keywords="수학 대모험 연산 덧셈 뺄셈 곱셈 게임 산수">
+        <article class="project-card" data-category="edu" data-keywords="수학 대모험 연산 덧셈 뺄셈 곱셈 게임 산수 사칙연산">
           <div class="card-top">
             <span class="card-icon">⚔️</span>
             <span class="badge badge-edu">수학·게임</span>
@@ -587,7 +586,7 @@
         </article>
 
         <!-- 12. 시계 읽기 -->
-        <article class="project-card" data-category="edu" data-keywords="시계 아날로그 시간 분 시침 분침 기초수학">
+        <article class="project-card" data-category="edu" data-keywords="시계 아날로그 시간 분 시침 분침 기초수학 학습교구">
           <div class="card-top">
             <span class="card-icon">⏰</span>
             <span class="badge badge-edu">수학·생활</span>
@@ -600,7 +599,7 @@
         </article>
 
         <!-- 13. 제미나이 기반 AI 캐치 마인드 -->
-        <article class="project-card" data-category="ai" data-keywords="제미나이 gemini ai 인공지능 캐치마인드 그림 퀴즈">
+        <article class="project-card" data-category="ai" data-keywords="제미나이 gemini ai 인공지능 캐치마인드 그림 퀴즈 드로잉">
           <div class="card-top">
             <span class="card-icon">🎨</span>
             <span class="badge badge-ai">AI 융합</span>
@@ -613,7 +612,7 @@
         </article>
 
         <!-- 14. AI 칼로리 계산기 -->
-        <article class="project-card" data-category="ai" data-keywords="칼로리 계산 식단 영양 ai claude 사진 분석 헬스">
+        <article class="project-card" data-category="ai" data-keywords="칼로리 계산 식단 영양 ai claude 사진 분석 헬스 다이어트 음식">
           <div class="card-top">
             <span class="card-icon">🥗</span>
             <span class="badge badge-ai">AI 융합</span>
@@ -626,7 +625,7 @@
         </article>
 
         <!-- 15. 학급 생일 관리 -->
-        <article class="project-card" data-category="tool" data-keywords="학급 생일 관리 구글시트 학생 기념일 학교 교육 달력">
+        <article class="project-card" data-category="tool" data-keywords="학급 생일 관리 구글시트 학생 기념일 학교 교육 달력 캘린더">
           <div class="card-top">
             <span class="card-icon">🎂</span>
             <span class="badge badge-sheet">학급·구글시트</span>
@@ -639,7 +638,7 @@
         </article>
 
         <!-- 16. 지출 관리 -->
-        <article class="project-card" data-category="tool" data-keywords="지출 관리 가계부 소비 내역 예산 영수증 돈 구글시트">
+        <article class="project-card" data-category="tool" data-keywords="지출 관리 가계부 소비 내역 예산 영수증 돈 구글시트 금융">
           <div class="card-top">
             <span class="card-icon">💰</span>
             <span class="badge badge-sheet">금융·구글시트</span>
@@ -677,79 +676,79 @@
           </a>
         </article>
 
-          <!-- 19. 가상전시 -->
-        <article class="project-card" data-category="tool" data-keywords="운동 체크리스트 헬스 피트니스 운동기록 pwa 건강 루틴 관리">
+        <!-- 19. 가상전시 -->
+        <article class="project-card" data-category="tool" data-keywords="가상전시 갤러리 미술 그림 전시 예술 감상평 방명록 구글시트">
           <div class="card-top">
             <span class="card-icon">🖼️</span>
-            <span class="badge badge-health">예술, 감상</span>
+            <span class="badge badge-art">예술·감상</span>
           </div>
           <h3>가상전시</h3>
-          <p>업로드된 그림을 감상하고 감상평을 작성하는 앱입니다.</p>
+          <p>온라인 갤러리에 업로드된 미술 작품을 감상하고 자유롭게 감상평을 작성할 수 있는 전시 앱입니다.</p>
           <a class="project-link" href="https://script.google.com/macros/s/AKfycbxTS8vHqRducQqFkyNNLDzJrXRoN2bTam87EziUwP1v03ZRxy3MR6JEOdXF-60lqkKiYg/exec" target="_blank" rel="noopener noreferrer">
             결과물 보기 (외부 링크) <span>↗</span>
           </a>
         </article>
 
-         <!-- 20. 스마트 장보기 미션앱 -->
-        <article class="project-card" data-category="tool" data-keywords="운동 체크리스트 헬스 피트니스 운동기록 pwa 건강 루틴 관리">
+        <!-- 20. 스마트 장보기 미션앱 -->
+        <article class="project-card" data-category="edu" data-keywords="스마트 장보기 미션 경제 합리적 소비 마트 장바구니 실과 금융 교구">
           <div class="card-top">
-            <span class="card-icon">🖼️</span>
-            <span class="badge badge-health">예술, 감상</span>
+            <span class="card-icon">🛒</span>
+            <span class="badge badge-edu">실과·경제</span>
           </div>
           <h3>스마트 장보기 미션앱</h3>
-          <p>초등학생 대상 실생활 밀착형 경지, 합리적 소비 교육 웹 .</p>
+          <p>초등학생 대상 실생활 밀착형 경제 및 합리적 소비 습관을 흥미진진한 미션으로 배우는 교육용 웹 앱입니다.</p>
           <a class="project-link" href="우리 반 스마트 장보기 미션.html" target="_blank" rel="noopener noreferrer">
-            결과물 보기 (외부 링크) <span>↗</span>
+            결과물 보기 <span>➔</span>
           </a>
         </article>
 
-         <!-- 21. 학생활동성향 -->
-        <article class="project-card" data-category="tool" data-keywords="운동 체크리스트 헬스 피트니스 운동기록 pwa 건강 루틴 관리">
+        <!-- 21. 학생활동성향 진단 -->
+        <article class="project-card" data-category="ai" data-keywords="학생활동성향 성향 검사 심리 진단 상담 지원 교사 데이터 분석">
           <div class="card-top">
-            <span class="card-icon">🖼️</span>
-            <span class="badge badge-health">예술, 감상</span>
+            <span class="card-icon">🧩</span>
+            <span class="badge badge-ai">상담·진단</span>
           </div>
           <h3>학생활동성향</h3>
-          <p>초등학생의 성향을 측정하고 교사와의 상담을 지원 .</p>
+          <p>초등학생의 다양한 활동 성향을 진단하고 담임교사와의 개별 맞춤 상담을 효과적으로 지원합니다.</p>
           <a class="project-link" href="https://script.google.com/macros/s/AKfycbwVT66XY5G414BHh7zBkc0b4TYv5a-RTt08LvylIQdHLKCmHqyI5iYbX_vAgjQ8GWY/exec" target="_blank" rel="noopener noreferrer">
             결과물 보기 (외부 링크) <span>↗</span>
           </a>
         </article>
 
-        <!-- 22. 단체티셔츠 조사 -->
-        <article class="project-card" data-category="tool" data-keywords="운동 체크리스트 헬스 피트니스 운동기록 pwa 건강 루틴 관리">
+        <!-- 22. 단체 티셔츠 조사 -->
+        <article class="project-card" data-category="tool" data-keywords="단체 티셔츠 조사 사이즈 설문 수요조사 학급 단체복 엑셀 구글시트">
           <div class="card-top">
-            <span class="card-icon">🖼️</span>
-            <span class="badge badge-health">예술, 감상</span>
+            <span class="card-icon">👕</span>
+            <span class="badge badge-sheet">학급·구글시트</span>
           </div>
           <h3>단체 티셔츠 조사</h3>
-          <p>번호와 사이즈를 드롭다운으로 선택해 실시간으로 현황을 집계하고 엑셀로 다운.</p>
+          <p>학생 번호와 사이즈를 선택해 실시간으로 수요 현황을 집계하고 엑셀 파일로 손쉽게 내려받을 수 있습니다.</p>
           <a class="project-link" href="https://script.google.com/macros/s/AKfycbz7ohK2sPe4jWQ7cGCgNCzjjsTpmAHQE3FL2gm7Jduvu48sJ_czoo7dF8osdydiU2c/exec" target="_blank" rel="noopener noreferrer">
             결과물 보기 (외부 링크) <span>↗</span>
           </a>
         </article>
 
         <!-- 23. 우리반 스마트 학급 게시판 앱 -->
-        <article class="project-card" data-category="tool" data-keywords="운동 체크리스트 헬스 피트니스 운동기록 pwa 건강 루틴 관리">
+        <article class="project-card" data-category="tool" data-keywords="우리반 스마트 학급 게시판 알림장 공지사항 달력 캘린더 피드 구글시트">
           <div class="card-top">
-            <span class="card-icon">🖼️</span>
-            <span class="badge badge-health">예술, 감상</span>
+            <span class="card-icon">📢</span>
+            <span class="badge badge-sheet">학급·구글시트</span>
           </div>
           <h3>우리반 스마트 학급 게시판</h3>
-          <p>교사와 학생이 중요한 학급 공지사항과 알림장, 학급 일정을 한눈에 공유하고 실시간으로 소통.</p>
+          <p>교사와 학생이 중요한 학급 공지사항과 알림장, 학급 일정을 한눈에 공유하고 실시간으로 소통합니다.</p>
           <a class="project-link" href="https://script.google.com/macros/s/AKfycbyteZCpf93oCHd75GSPQ6MNPu11yEYpnAzDN98YGWpvXc0iMxcc15KXBZtknZAb9OfsaA/exec" target="_blank" rel="noopener noreferrer">
             결과물 보기 (외부 링크) <span>↗</span>
           </a>
         </article>
 
-          <!-- 24. 디지털 상점-->
-        <article class="project-card" data-category="tool" data-keywords="운동 체크리스트 헬스 피트니스 운동기록 pwa 건강 루틴 관리">
+        <!-- 24. 디지털 학급보상 상점 -->
+        <article class="project-card" data-category="tool" data-keywords="디지털 학급보상 상점 칭찬 포인트 쿠폰 마일리지 pin 비밀번호 구글시트">
           <div class="card-top">
-            <span class="card-icon">🖼️</span>
-            <span class="badge badge-health">예술, 감상</span>
+            <span class="card-icon">🎁</span>
+            <span class="badge badge-sheet">학급·구글시트</span>
           </div>
           <h3>디지털 학급보상 상점</h3>
-          <p>학생들의 칭찬 포인트를 실시간으로 관리하고 상점 아이템을 구매, 사용할 수 있는 학급 경영 웹 앱.</p>
+          <p>학생들의 칭찬 포인트를 실시간으로 관리하고 상점 아이템을 구매·사용할 수 있는 스마트 학급경영 웹 앱입니다.</p>
           <a class="project-link" href="https://script.google.com/macros/s/AKfycbzkwS1qghXu3zpz2Cp6RrBaWvtzA3_-Zu2g3dZfSxH-a9k_6BDexS5mjTgSMQTdEKYPIg/exec" target="_blank" rel="noopener noreferrer">
             결과물 보기 (외부 링크) <span>↗</span>
           </a>
@@ -783,7 +782,7 @@
       let currentCategory = 'all';
       let currentQuery = '';
 
-      // 1. 카테고리 탭 숫자 자동 동기화 (프로젝트 추가/삭제 시 자동 반영)
+      // 1. 카테고리 탭 숫자 자동 동기화
       function updateTabCounts() {
         const counts = { all: cards.length, edu: 0, tool: 0, ai: 0 };
         cards.forEach(card => {
